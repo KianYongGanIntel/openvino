@@ -125,7 +125,9 @@ endif()
 
 if(ENABLE_SAMPLES OR ENABLE_TESTS)
     find_package(ZLIB QUIET)
-    add_subdirectory(thirdparty/zlib EXCLUDE_FROM_ALL)
+    if(NOT (zlib_FOUND OR ZLIB_FOUND))
+        add_subdirectory(thirdparty/zlib EXCLUDE_FROM_ALL)
+    endif()
 endif()
 
 #
