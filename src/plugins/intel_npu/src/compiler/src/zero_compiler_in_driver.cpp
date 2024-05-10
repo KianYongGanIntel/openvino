@@ -4,6 +4,7 @@
 
 #include "zero_compiler_in_driver.hpp"
 
+#include <iostream>
 #include <regex>
 #include <string_view>
 
@@ -945,6 +946,7 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
                                                             IONodeDescriptorMap& parameters,
                                                             IONodeDescriptorMap& results,
                                                             IONodeDescriptorMap& states) const {
+    std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> "<<std::endl;
     ze_graph_argument_properties_3_t arg;
     auto result = graphDdiTableExt->pfnGetArgumentProperties3(graphHandle, index, &arg);
     if (ZE_RESULT_SUCCESS != result) {
@@ -967,6 +969,20 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
     }
 
     getLayoutOrStateDescriptor(parameters, results, states, stateNames, arg);
+    std::cout << " KY-DEBUG_1 <NotSupportOriginalShape(T)> index : " << index << std::endl;
+
+    std::cout << "KY-DEBUG_1 InputNames \n";
+    for (const auto& name : inputNames) {
+        std::cout << name << std::endl;
+    }
+    std::cout << "KY-DEBUG_1 outputNames \n";
+    for (const auto& name : outputNames) {
+        std::cout << name << std::endl;
+    }
+    std::cout << "KY-DEBUG_1 stateNames \n";
+    for (const auto& name : stateNames) {
+        std::cout << name << std::endl;
+    }
 }
 
 template <typename TableExtension>
@@ -980,6 +996,8 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
                                                             IONodeDescriptorMap& parameters,
                                                             IONodeDescriptorMap& results,
                                                             IONodeDescriptorMap& states) const {
+    // printf
+    std::cout << " KY-DEBUG <!NotSupportOriginalShape(T)> !!! "<<std::endl;
     ze_graph_argument_properties_3_t arg;
     auto result = graphDdiTableExt->pfnGetArgumentProperties3(graphHandle, index, &arg);
     if (ZE_RESULT_SUCCESS != result) {
@@ -1013,6 +1031,21 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
     }
 
     getLayoutOrStateDescriptor(parameters, results, states, stateNames, arg);
+
+    std::cout << " KY-DEBUG <!NotSupportOriginalShape(T)> index : " << index << std::endl;
+
+    std::cout << "KY-DEBUG InputNames \n";
+    for (const auto& name : inputNames) {
+        std::cout << name << std::endl;
+    }
+    std::cout << "KY-DEBUG outputNames \n";
+    for (const auto& name : outputNames) {
+        std::cout << name << std::endl;
+    }
+    std::cout << "KY-DEBUG stateNames \n";
+    for (const auto& name : stateNames) {
+        std::cout << name << std::endl;
+    }
 }
 
 template <typename TableExtension>
