@@ -246,7 +246,7 @@ TEST_P(OVClassCompiledModelGetPropertyTest, GetMetricNoThrow_NETWORK_NAME) {
     OV_ASSERT_NO_THROW(model_name = compiled_model.get_property(ov::model_name));
 
     std::cout << "Compiled model name: " << std::endl << model_name << std::endl;
-    ASSERT_EQ(simpleNetwork->get_friendly_name(), model_name);
+    ASSERT_EQ(simpleNetwork->get_friendly_name(), model_name); //error happen when model_name is "", erro throw when "SingleConcatWithConst" == ""
     ASSERT_EXEC_METRIC_SUPPORTED(ov::model_name);
 }
 

@@ -888,7 +888,9 @@ void LevelZeroCompilerInDriver<TableExtension>::getLayoutOrStateDescriptor(IONod
  */
 static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
                               std::vector<std::string>& names,
-                              ze_graph_argument_properties_3_t& arg) {
+                              ze_graph_argument_properties_3_t& arg,
+                              ze_graph_argument_metadata_t& metadata) {
+    std::cout << "KY-DEBUG-getNodeDescriptor - debug Function" << std::endl;
     ov::element::Type_t precision = toOVElementType(arg.devicePrecision);
     ov::Shape shape;
     std::unordered_set<std::string> outputTensorNames;
@@ -901,45 +903,57 @@ static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
         shape.push_back(arg.dims[id]);
     }
 
+    for (uint32_t id = 0; id < metadata.shape_size; id++) {
+        shape.push_back(metadata.shape[id]);
+    }
+
     const std::string& legacyName = arg.name;
+
+    std::cout << "KY-DEBUG-getNodeDescriptor - names" << std::endl;
+    for(const auto& str : names) {
+        std::cout << str << std::endl;
+    }
+    std::cout << "KY-DEBUG-getNodeDescriptor - debug_friendly_name" << arg.debug_friendly_name << std::endl;
+    std::cout << "KY-DEBUG-getNodeDescriptor - debug_friendly_name" << legacyName << std::endl;
 
     names.push_back(arg.debug_friendly_name);
     nodeDescriptors[arg.debug_friendly_name] =
         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
 }
 
-static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
-                              std::vector<std::string>& names,
-                              ze_graph_argument_properties_3_t& arg,
-                              ze_graph_argument_metadata_t& metadata) {
-    ov::element::Type_t precision = toOVElementType(arg.devicePrecision);
-    ov::Shape transposedShape, originalShape;
-    std::unordered_set<std::string> outputTensorNames;
+// static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
+//                               std::vector<std::string>& names,
+//                               ze_graph_argument_properties_3_t& arg,
+//                               ze_graph_argument_metadata_t& metadata) {
+//     ov::element::Type_t precision = toOVElementType(arg.devicePrecision);
+//     ov::Shape transposedShape, originalShape;
+//     std::unordered_set<std::string> outputTensorNames;
 
-    for (uint32_t id = 0; id < arg.associated_tensor_names_count; id++) {
-        outputTensorNames.insert(arg.associated_tensor_names[id]);
-    }
+//     for (uint32_t id = 0; id < arg.associated_tensor_names_count; id++) {
+//         outputTensorNames.insert(arg.associated_tensor_names[id]);
+//     }
 
-    for (uint32_t id = 0; id < arg.dims_count; id++) {
-        transposedShape.push_back(arg.dims[id]);
-    }
+//     for (uint32_t id = 0; id < arg.dims_count; id++) {
+//         transposedShape.push_back(arg.dims[id]);
+//     }
 
-    for (uint32_t id = 0; id < metadata.shape_size; id++) {
-        originalShape.push_back(metadata.shape[id]);
-    }
+//     for (uint32_t id = 0; id < metadata.shape_size; id++) {
+//         originalShape.push_back(metadata.shape[id]);
+//     }
 
-    const std::string& legacyName = arg.name;
+//     const std::string& legacyName = arg.name;
 
-    names.push_back(arg.debug_friendly_name);
-    nodeDescriptors[arg.debug_friendly_name] =
-        {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, originalShape, transposedShape};
-}
+//     names.push_back(arg.debug_friendly_name);
+//     nodeDescriptors[arg.debug_friendly_name] =
+//         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, originalShape, transposedShape};
+// }
 
 template <typename TableExtension>
 template <typename T, std::enable_if_t<NotSupportOriginalShape(T), bool>>
 void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* graphDdiTableExt,
                                                             ze_graph_handle_t graphHandle,
                                                             uint32_t index,
+                                                            /*Add 1 more for input name ? */
                                                             std::vector<std::string>& inputNames,
                                                             std::vector<std::string>& outputNames,
                                                             std::vector<std::string>& stateNames,
@@ -959,13 +973,29 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
     }
 
     if (!isStateInputName(arg.name) && !isStateOutputName(arg.name)) {
+        std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> enter if statement "<<std::endl;
+        ze_graph_argument_metadata_t metadata;
+        result = graphDdiTableExt->pfnGraphGetArgumentMetadata(graphHandle, index, &metadata);
+        if (ZE_RESULT_SUCCESS != result) {
+            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> result fail "<<std::endl;
+            OPENVINO_THROW("L0 pfnGraphGetArgumentMetadata",
+                           " result: ",
+                           ze_result_to_string(result),
+                           ", code 0x",
+                           std::hex,
+                           uint64_t(result));
+        }
+
         if (ZE_GRAPH_ARGUMENT_TYPE_INPUT == arg.type) {
-            getNodeDescriptor(parameters, inputNames, arg);
+            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> input type"<<std::endl;
+            getNodeDescriptor(parameters, inputNames, arg, metadata);
         }
 
         if (ZE_GRAPH_ARGUMENT_TYPE_OUTPUT == arg.type) {
-            getNodeDescriptor(results, outputNames, arg);
+            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> output type"<<std::endl;
+            getNodeDescriptor(results, outputNames, arg, metadata);
         }
+        std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> if statement done "<<std::endl;
     }
 
     getLayoutOrStateDescriptor(parameters, results, states, stateNames, arg);
@@ -1069,6 +1099,7 @@ NetworkMetadata LevelZeroCompilerInDriver<TableExtension>::getNetworkMeta(ze_gra
         getMetadata(_graphDdiTableExt,
                     graphHandle,
                     index,
+                    /*Add 1 more for model name*/
                     meta.inputNames,
                     meta.outputNames,
                     meta.stateNames,

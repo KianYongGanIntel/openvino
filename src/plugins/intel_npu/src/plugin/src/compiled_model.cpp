@@ -5,6 +5,7 @@
 #include "compiled_model.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <string_view>
 
 #include "async_infer_request.hpp"
@@ -145,10 +146,21 @@ void CompiledModel::set_property(const ov::AnyMap& /*properties*/) {
 }
 
 ov::Any CompiledModel::get_property(const std::string& name) const {
+    std::cout << "KY-DEBUG get_property : " << name << std::endl;
     auto configIterator = _properties.find(name);
+
+    // std::cout << "KY-DEBUG get_property configIterator: "<< configIterator << std::endl;
+
     if (configIterator != _properties.cend()) {
+        // std::cout << "KY-DEBUG get_property configIterator <0>: " << std::get<0>(configIterator->second)(_config)
+        //           << std::endl;
+        // std::cout << "KY-DEBUG get_property configIterator <1>: " << std::get<1>(configIterator->second)(_config)
+        //           << std::endl;
+        // std::cout << "KY-DEBUG get_property configIterator <2>: " << std::get<2>(configIterator->second)(_config).str()
+        //           << std::endl;
         return std::get<2>(configIterator->second)(_config);
     }
+    std::cout << "KY-DEBUG Unsupported property" << std::endl;
 
     OPENVINO_THROW("Unsupported property ", name);
 }

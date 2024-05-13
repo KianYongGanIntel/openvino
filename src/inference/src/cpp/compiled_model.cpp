@@ -137,10 +137,12 @@ void CompiledModel::set_property(const AnyMap& config) {
 }
 
 Any CompiledModel::get_property(const std::string& name) const {
+    printf("KY-DEBUG get_property - debug msg");
     OV_COMPILED_MODEL_CALL_STATEMENT({
         auto property = _impl->get_property(name);
         if (!property._so)
             property._so = _so;
+        printf("KY-DEBUG get_property - debug msg RETURN property");
         return property;
     });
 }
