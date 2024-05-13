@@ -903,21 +903,25 @@ static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
         shape.push_back(arg.dims[id]);
     }
 
-    for (uint32_t id = 0; id < metadata.shape_size; id++) {
-        shape.push_back(metadata.shape[id]);
-    }
+    // for (uint32_t id = 0; id < metadata.shape_size; id++) {
+    //     shape.push_back(metadata.shape[id]);
+    // }
 
     const std::string& legacyName = arg.name;
 
-    std::cout << "KY-DEBUG-getNodeDescriptor - names" << std::endl;
-    for(const auto& str : names) {
+    std::cout << "KY-DEBUG-getNodeDescriptor - names --------" << std::endl;
+    for (const auto& str : names) {
         std::cout << str << std::endl;
     }
-    std::cout << "KY-DEBUG-getNodeDescriptor - debug_friendly_name" << arg.debug_friendly_name << std::endl;
-    std::cout << "KY-DEBUG-getNodeDescriptor - debug_friendly_name" << legacyName << std::endl;
+    std::cout << "KY-DEBUG-getNodeDescriptor - arg.debug_friendly_name - " << arg.debug_friendly_name << std::endl;
+    std::cout << "KY-DEBUG-getNodeDescriptor - legacyName  - " << legacyName << std::endl;
 
-    names.push_back(arg.debug_friendly_name);
-    nodeDescriptors[arg.debug_friendly_name] =
+    // names.push_back(arg.debug_friendly_name);
+    // nodeDescriptors[arg.debug_friendly_name] =
+    //     {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
+
+    names.push_back(legacyName);
+    nodeDescriptors[legacyName] =
         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
 }
 
@@ -945,7 +949,8 @@ static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
 
 //     names.push_back(arg.debug_friendly_name);
 //     nodeDescriptors[arg.debug_friendly_name] =
-//         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, originalShape, transposedShape};
+//         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, originalShape,
+//         transposedShape};
 // }
 
 template <typename TableExtension>
@@ -960,7 +965,7 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
                                                             IONodeDescriptorMap& parameters,
                                                             IONodeDescriptorMap& results,
                                                             IONodeDescriptorMap& states) const {
-    std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> "<<std::endl;
+    std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> " << std::endl;
     ze_graph_argument_properties_3_t arg;
     auto result = graphDdiTableExt->pfnGetArgumentProperties3(graphHandle, index, &arg);
     if (ZE_RESULT_SUCCESS != result) {
@@ -973,11 +978,11 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
     }
 
     if (!isStateInputName(arg.name) && !isStateOutputName(arg.name)) {
-        std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> enter if statement "<<std::endl;
+        std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> enter if statement " << std::endl;
         ze_graph_argument_metadata_t metadata;
         result = graphDdiTableExt->pfnGraphGetArgumentMetadata(graphHandle, index, &metadata);
         if (ZE_RESULT_SUCCESS != result) {
-            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> result fail "<<std::endl;
+            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> result fail " << std::endl;
             OPENVINO_THROW("L0 pfnGraphGetArgumentMetadata",
                            " result: ",
                            ze_result_to_string(result),
@@ -987,15 +992,15 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
         }
 
         if (ZE_GRAPH_ARGUMENT_TYPE_INPUT == arg.type) {
-            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> input type"<<std::endl;
+            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> input type" << std::endl;
             getNodeDescriptor(parameters, inputNames, arg, metadata);
         }
 
         if (ZE_GRAPH_ARGUMENT_TYPE_OUTPUT == arg.type) {
-            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> output type"<<std::endl;
+            std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> output type" << std::endl;
             getNodeDescriptor(results, outputNames, arg, metadata);
         }
-        std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> if statement done "<<std::endl;
+        std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> if statement done " << std::endl;
     }
 
     getLayoutOrStateDescriptor(parameters, results, states, stateNames, arg);
@@ -1027,7 +1032,7 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
                                                             IONodeDescriptorMap& results,
                                                             IONodeDescriptorMap& states) const {
     // printf
-    std::cout << " KY-DEBUG <!NotSupportOriginalShape(T)> !!! "<<std::endl;
+    std::cout << " KY-DEBUG <!NotSupportOriginalShape(T)> !!! " << std::endl;
     ze_graph_argument_properties_3_t arg;
     auto result = graphDdiTableExt->pfnGetArgumentProperties3(graphHandle, index, &arg);
     if (ZE_RESULT_SUCCESS != result) {
