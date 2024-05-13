@@ -145,19 +145,35 @@ void CompiledModel::set_property(const ov::AnyMap& /*properties*/) {
     OPENVINO_NOT_IMPLEMENTED;
 }
 
+std::string PropertyMutabilityToString(ov::PropertyMutability value) {
+    switch (value) {
+    case ov::PropertyMutability::RO:
+        return "READ_ONLY";
+    case ov::PropertyMutability::RW:
+        return "READ_WRITE";
+    // Add more cases as needed
+    default:
+        return "UNKNOWN";
+    }
+}
+
 ov::Any CompiledModel::get_property(const std::string& name) const {
     std::cout << "KY-DEBUG get_property : " << name << std::endl;
     auto configIterator = _properties.find(name);
 
-    // std::cout << "KY-DEBUG get_property configIterator: "<< configIterator << std::endl;
+    std::cout << "KY-DEBUG get_property configIterator" << std::endl;
+    for (const auto& kv : _properties) {
+        const auto& key = kv.first;
+        const auto& value = kv.second;
+
+        bool firstElement = std::get<0>(value);
+        ov::PropertyMutability secondElement = std::get<1>(value);
+
+        std::cout << "Key: " << key << ", First Element: " << std::boolalpha << firstElement
+                  << ", Second Element: " << PropertyMutabilityToString(secondElement) << std::endl;
+    }
 
     if (configIterator != _properties.cend()) {
-        // std::cout << "KY-DEBUG get_property configIterator <0>: " << std::get<0>(configIterator->second)(_config)
-        //           << std::endl;
-        // std::cout << "KY-DEBUG get_property configIterator <1>: " << std::get<1>(configIterator->second)(_config)
-        //           << std::endl;
-        // std::cout << "KY-DEBUG get_property configIterator <2>: " << std::get<2>(configIterator->second)(_config).str()
-        //           << std::endl;
         return std::get<2>(configIterator->second)(_config);
     }
     std::cout << "KY-DEBUG Unsupported property" << std::endl;

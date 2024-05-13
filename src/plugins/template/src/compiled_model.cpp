@@ -5,7 +5,7 @@
 #include "compiled_model.hpp"
 
 #include <memory>
-
+#include <iostream>
 #include "async_infer_request.hpp"
 #include "itt.hpp"
 #include "openvino/op/util/op_types.hpp"
@@ -126,6 +126,9 @@ std::shared_ptr<const ov::template_plugin::Plugin> ov::template_plugin::Compiled
 
 // ! [compiled_model:get_property]
 ov::Any ov::template_plugin::CompiledModel::get_property(const std::string& name) const {
+    // print here 
+    std::cout << "template_plugin::CompiledModel::get_property, the input names   : " << name << std::endl;
+
     const auto& default_ro_properties = []() {
         std::vector<ov::PropertyName> ro_properties{ov::model_name,
                                                     ov::supported_properties,
@@ -139,17 +142,23 @@ ov::Any ov::template_plugin::CompiledModel::get_property(const std::string& name
         return rw_properties;
     };
     if (ov::model_name == name) {
+        std::cout << "OV::model_name is the same ! name == ov::model -" << ov::model_name << std::endl;
         auto& model_name = m_model->get_friendly_name();
+        std::cout << "The get_friendly_name -" << model_name << std::endl;
         return decltype(ov::model_name)::value_type(model_name);
     } else if (ov::loaded_from_cache == name) {
+        std::cout << "ov::loaded_from_cache is the same !"<< std::endl;
         return m_loaded_from_cache;
     } else if (ov::execution_devices == name) {
+        std::cout << "ov::execution_devices  is the same !"<< std::endl;
         return decltype(ov::execution_devices)::value_type{get_plugin()->get_device_name() + "." +
                                                            std::to_string(m_cfg.device_id)};
     } else if (ov::optimal_number_of_infer_requests == name) {
+        std::cout << "ov::optimal_number_of_infer_requests !"<< std::endl;
         unsigned int value = m_cfg.streams;
         return decltype(ov::optimal_number_of_infer_requests)::value_type(value);
     } else if (ov::supported_properties == name) {
+        std::cout << "ov::supported_properties !"<< std::endl;
         auto ro_properties = default_ro_properties();
         auto rw_properties = default_rw_properties();
 
@@ -159,6 +168,8 @@ ov::Any ov::template_plugin::CompiledModel::get_property(const std::string& name
         supported_properties.insert(supported_properties.end(), rw_properties.begin(), rw_properties.end());
         return decltype(ov::supported_properties)::value_type(supported_properties);
     }
+
+    std::cout << "nothing hit return ! m_cfg.Get(name) "<< std::endl;
 
     return m_cfg.Get(name);
 }
