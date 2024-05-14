@@ -174,6 +174,10 @@ ov::Any CompiledModel::get_property(const std::string& name) const {
     }
 
     if (configIterator != _properties.cend()) {
+        // this one causing return not correct ?
+        auto result = std::get<2>(configIterator->second)(_config);
+        std::cout << "Result: " << result.as<std::string>() << std::endl;
+
         return std::get<2>(configIterator->second)(_config);
     }
     std::cout << "KY-DEBUG Unsupported property" << std::endl;
