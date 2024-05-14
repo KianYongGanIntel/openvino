@@ -140,6 +140,8 @@ Any CompiledModel::get_property(const std::string& name) const {
     printf("KY-DEBUG get_property - debug msg\n");
     OV_COMPILED_MODEL_CALL_STATEMENT({
         auto property = _impl->get_property(name);
+        ov::Any property_return = _impl->get_property(name);
+        std::cout << "Property return: " << property_return.as<std::string>() << std::endl;
         if (!property._so) {
             printf("property._so empty ! assign empty to it ! \n");
             property._so = _so;
