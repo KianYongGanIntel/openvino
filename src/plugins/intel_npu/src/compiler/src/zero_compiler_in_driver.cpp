@@ -958,6 +958,7 @@ template <typename T, std::enable_if_t<NotSupportOriginalShape(T), bool>>
 void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* graphDdiTableExt,
                                                             ze_graph_handle_t graphHandle,
                                                             uint32_t index,
+                                                            std::string &name,
                                                             /*Add 1 more for input name ? */
                                                             std::vector<std::string>& inputNames,
                                                             std::vector<std::string>& outputNames,
@@ -981,6 +982,8 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
         std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> enter if statement " << std::endl;
         ze_graph_argument_metadata_t metadata;
         result = graphDdiTableExt->pfnGraphGetArgumentMetadata(graphHandle, index, &metadata);
+        name = metadata.friendly_name;
+        std::cout << " KY-DEBUG The meta data friendly_name is : "<< metadata.friendly_name << std::endl;
         if (ZE_RESULT_SUCCESS != result) {
             std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> result fail " << std::endl;
             OPENVINO_THROW("L0 pfnGraphGetArgumentMetadata",
@@ -1025,6 +1028,7 @@ template <typename T, std::enable_if_t<!NotSupportOriginalShape(T), bool>>
 void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* graphDdiTableExt,
                                                             ze_graph_handle_t graphHandle,
                                                             uint32_t index,
+                                                            std::string &name,
                                                             std::vector<std::string>& inputNames,
                                                             std::vector<std::string>& outputNames,
                                                             std::vector<std::string>& stateNames,
@@ -1047,6 +1051,7 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
     if (!isStateInputName(arg.name) && !isStateOutputName(arg.name)) {
         ze_graph_argument_metadata_t metadata;
         result = graphDdiTableExt->pfnGraphGetArgumentMetadata(graphHandle, index, &metadata);
+        name = metadata.friendly_name;
         if (ZE_RESULT_SUCCESS != result) {
             OPENVINO_THROW("L0 pfnGraphGetArgumentMetadata",
                            " result: ",
@@ -1105,6 +1110,7 @@ NetworkMetadata LevelZeroCompilerInDriver<TableExtension>::getNetworkMeta(ze_gra
                     graphHandle,
                     index,
                     /*Add 1 more for model name*/
+                    meta.name,
                     meta.inputNames,
                     meta.outputNames,
                     meta.stateNames,

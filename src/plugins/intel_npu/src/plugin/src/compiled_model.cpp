@@ -174,6 +174,12 @@ ov::Any CompiledModel::get_property(const std::string& name) const {
     }
 
     std::cout << "KY-DEBUG get_property configIterator could be empty " << std::endl;
+
+    if (configIterator == _properties.cend()) {
+        std::cout << "KY-DEBUG configIterator is empty ! NOT FOUND network!  " << std::endl;
+        OPENVINO_THROW("Unsupported property ", name);
+    }
+
     if (configIterator != _properties.cend()) {
         std::cout << "KY-DEBUG get_property configIterator NOT empty ! " << std::endl;
         // this one causing return not correct ?
@@ -251,6 +257,12 @@ void CompiledModel::initialize_properties() {
          {true,
           ov::PropertyMutability::RO,
           [&](const Config&) {
+              std::cout << "KY-DEBUG metadata included ! : " << _networkPtr->metadata.name << std::endl;
+              if (_networkPtr != nullptr) {
+                  std::cout << "KY-DEBUG _networkPtr NOT null ! : " << (_networkPtr != nullptr) << std::endl;
+              } else {
+                  std::cout << "KY-DEBUG _networkPtr NULL ! : " << (_networkPtr != nullptr) << std::endl;
+              }
               OPENVINO_ASSERT(_networkPtr != nullptr, "Missing network descriptor");
               return _networkPtr->metadata.name;
           }}},
