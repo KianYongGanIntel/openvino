@@ -158,10 +158,10 @@ std::string PropertyMutabilityToString(ov::PropertyMutability value) {
 }
 
 ov::Any CompiledModel::get_property(const std::string& name) const {
-    std::cout << "KY-DEBUG get_property : " << name << std::endl;
+    std::cout << "KY-DEBUG get_property start : " << name << std::endl;
     auto configIterator = _properties.find(name);
 
-    std::cout << "KY-DEBUG get_property configIterator" << std::endl;
+    std::cout << "KY-DEBUG get_property _properties" << std::endl;
     for (const auto& kv : _properties) {
         const auto& key = kv.first;
         const auto& value = kv.second;
@@ -169,17 +169,20 @@ ov::Any CompiledModel::get_property(const std::string& name) const {
         bool firstElement = std::get<0>(value);
         ov::PropertyMutability secondElement = std::get<1>(value);
 
-        std::cout << "Key: " << key << ", First Element: " << std::boolalpha << firstElement
+        std::cout << "      Key: " << key << ", First Element: " << std::boolalpha << firstElement
                   << ", Second Element: " << PropertyMutabilityToString(secondElement) << std::endl;
     }
 
+    std::cout << "KY-DEBUG get_property configIterator could be empty " << std::endl;
     if (configIterator != _properties.cend()) {
+        std::cout << "KY-DEBUG get_property configIterator NOT empty ! " << std::endl;
         // this one causing return not correct ?
         auto result = std::get<2>(configIterator->second)(_config);
         std::cout << "Result: " << result.as<std::string>() << std::endl;
 
         return std::get<2>(configIterator->second)(_config);
     }
+
     std::cout << "KY-DEBUG Unsupported property" << std::endl;
 
     OPENVINO_THROW("Unsupported property ", name);
