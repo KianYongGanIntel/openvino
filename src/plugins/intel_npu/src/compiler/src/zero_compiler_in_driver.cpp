@@ -910,9 +910,9 @@ static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
 
     const std::string& legacyName = arg.name;
 
-    std::cout << "KY-DEBUG-getNodeDescriptor - names --------" << std::endl;
+    std::cout << "\n----KY-DEBUG-getNodeDescriptor - print names --------" << std::endl;
     for (const auto& str : names) {
-        std::cout << str << std::endl;
+        std::cout << "Debug : " <<str << std::endl;
     }
     std::cout << "KY-DEBUG-getNodeDescriptor - arg.debug_friendly_name - " << arg.debug_friendly_name << std::endl;
     std::cout << "KY-DEBUG-getNodeDescriptor - legacyName  - " << legacyName << std::endl;
@@ -924,7 +924,7 @@ static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
     // names.push_back(arg.debug_friendly_name);
     std::string ans = std::string(arg.name) + " - " + std::string(arg.debug_friendly_name);
     names.push_back("KY-ANS! " + ans);
-    
+
     nodeDescriptors[arg.debug_friendly_name] =
         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
 }
@@ -970,7 +970,7 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
                                                             IONodeDescriptorMap& parameters,
                                                             IONodeDescriptorMap& results,
                                                             IONodeDescriptorMap& states) const {
-    std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> " << std::endl;
+    std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> function" << std::endl;
     ze_graph_argument_properties_3_t arg;
     auto result = graphDdiTableExt->pfnGetArgumentProperties3(graphHandle, index, &arg);
     if (ZE_RESULT_SUCCESS != result) {
@@ -981,23 +981,43 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
                        std::hex,
                        uint64_t(result));
     }
-
+    std::cout << "***** KY-DEBUG <NotSupportOriginalShape(T)> checking if statement : "<< arg.name << std::endl;
     if (!isStateInputName(arg.name) && !isStateOutputName(arg.name)) {
         std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> enter if statement " << std::endl;
         ze_graph_argument_metadata_t metadata;
         result = graphDdiTableExt->pfnGraphGetArgumentMetadata(graphHandle, index, &metadata);
 
-        name = metadata.friendly_name;// ze_graph_argument_properties_3_t ARG.NAME?
-        name = name + " - " + metadata.input_name;
-        //name = name + " - " + metadata.tensor_names;
-        name = name + " - " + arg.name;
-        //name = name + " - " + arg.associated_tensor_names;
-        name = name + " - " + arg.debug_friendly_name;
+        // ----------------------------------------------------------------------------------------
+        //*** Key part to get string "SingleConcatWithConstant" from simpleNetwork->get_friendly_name()
+        // name = 
+        name = "Debugging this return";
+        // ----------------------------------------------------------------------------------------
+        // Q1 how come my friendly_name is not "SingleConcatWithConstant"
 
-        std::cout << " KY-DEBUG The name return : "<< name << std::endl;
-        std::cout << " KY-DEBUG The name 2D tensor_names : "<< metadata.input_name << std::endl;
-        std::cout << " KY-DEBUG The name 2D associated_tensor_names : "<< arg.associated_tensor_names << std::endl;
-        std::cout << " KY-DEBUG The meta data friendly_name is : "<< metadata.friendly_name << std::endl;
+        std::string str = metadata.friendly_name; //result 
+        str = str + " - " + metadata.input_name; // concat
+        
+        str = str + " - " + arg.name; // concat 
+        str = str + " - " + arg.debug_friendly_name; //result
+
+        str = str + " - " + arg.associated_tensor_names[0][0];
+        str = str + " - " + arg.associated_tensor_names[0][1];
+        str = str + " - " + arg.associated_tensor_names[0][2];
+        str = str + " - " + arg.associated_tensor_names[1][0];
+        str = str + " - " + arg.associated_tensor_names[1][1];
+        str = str + " - " + arg.associated_tensor_names[1][2];
+
+        str = str + " - " + metadata.tensor_names[0][0];
+        str = str + " - " + metadata.tensor_names[0][1];
+        str = str + " - " + metadata.tensor_names[0][2];
+        str = str + " - " + metadata.tensor_names[1][0];
+        str = str + " - " + metadata.tensor_names[1][1];
+        str = str + " - " + metadata.tensor_names[1][2];
+
+        std::cout << " KY-DEBUG The name return : "<< str << std::endl; // already in  result - concat - concat - result
+        std::cout << " KY-DEBUG The metadata.input_name : "<< metadata.input_name << std::endl; //concat 
+        std::cout << " KY-DEBUG The arg.associated_tensor_names : "<< arg.associated_tensor_names << std::endl;
+        std::cout << " KY-DEBUG The meta data friendly_name is : "<< metadata.friendly_name << std::endl; //cat 
 
         if (ZE_RESULT_SUCCESS != result) {
             std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> result fail " << std::endl;
@@ -1066,7 +1086,8 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
     if (!isStateInputName(arg.name) && !isStateOutputName(arg.name)) {
         ze_graph_argument_metadata_t metadata;
         result = graphDdiTableExt->pfnGraphGetArgumentMetadata(graphHandle, index, &metadata);
-        name = metadata.friendly_name;
+        //name = metadata.friendly_name;
+        name = "KY-DEBUGGING THIS";
         if (ZE_RESULT_SUCCESS != result) {
             OPENVINO_THROW("L0 pfnGraphGetArgumentMetadata",
                            " result: ",

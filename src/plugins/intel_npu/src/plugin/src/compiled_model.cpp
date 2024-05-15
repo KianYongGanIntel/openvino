@@ -186,7 +186,7 @@ ov::Any CompiledModel::get_property(const std::string& name) const {
         << static_cast<int>(std::get<1>(item.second)) << ", " << "function pointer" << ")" << std::endl;
         if (++count >= 10) {
             break;
-            }
+        }
     }
 
     if (configIterator != _properties.cend()) {
