@@ -920,8 +920,8 @@ static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
     // nodeDescriptors[arg.debug_friendly_name] =
     //     {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
 
-    names.push_back(legacyName);
-    nodeDescriptors[legacyName] =
+    names.push_back(arg.debug_friendly_name);
+    nodeDescriptors[arg.debug_friendly_name] =
         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
 }
 
@@ -982,8 +982,19 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
         std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> enter if statement " << std::endl;
         ze_graph_argument_metadata_t metadata;
         result = graphDdiTableExt->pfnGraphGetArgumentMetadata(graphHandle, index, &metadata);
-        name = metadata.friendly_name;
+
+        name = metadata.friendly_name;// ze_graph_argument_properties_3_t ARG.NAME?
+        name = name + " - " + metadata.input_name;
+        //name = name + " - " + metadata.tensor_names;
+        name = name + " - " + arg.name;
+        //name = name + " - " + arg.associated_tensor_names;
+        name = name + " - " + arg.debug_friendly_name;
+
+        std::cout << " KY-DEBUG The name return : "<< name << std::endl;
+        std::cout << " KY-DEBUG The name 2D tensor_names : "<< metadata.input_name << std::endl;
+        std::cout << " KY-DEBUG The name 2D associated_tensor_names : "<< arg.associated_tensor_names << std::endl;
         std::cout << " KY-DEBUG The meta data friendly_name is : "<< metadata.friendly_name << std::endl;
+
         if (ZE_RESULT_SUCCESS != result) {
             std::cout << " KY-DEBUG <NotSupportOriginalShape(T)> result fail " << std::endl;
             OPENVINO_THROW("L0 pfnGraphGetArgumentMetadata",
@@ -1013,7 +1024,7 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
     for (const auto& name : inputNames) {
         std::cout << name << std::endl;
     }
-    std::cout << "KY-DEBUG_1 outputNames \n";
+    std::cout << "KY-DEBUG_1 outputNames \n"; //name here not complete
     for (const auto& name : outputNames) {
         std::cout << name << std::endl;
     }

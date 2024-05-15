@@ -180,11 +180,29 @@ ov::Any CompiledModel::get_property(const std::string& name) const {
         OPENVINO_THROW("Unsupported property ", name);
     }
 
+    int count = 0;
+    for (const auto& item : _properties) {
+        std::cout << "Key: " << item.first << ", Value: (" << std::get<0>(item.second) << ", "
+        << static_cast<int>(std::get<1>(item.second)) << ", " << "function pointer" << ")" << std::endl;
+        if (++count >= 10) {
+            break;
+            }
+    }
+
     if (configIterator != _properties.cend()) {
         std::cout << "KY-DEBUG get_property configIterator NOT empty ! " << std::endl;
         // this one causing return not correct ?
         auto result = std::get<2>(configIterator->second)(_config);
         std::cout << "Result: " << result.as<std::string>() << std::endl;
+
+        // result = std::get<0>(configIterator->second);
+        // std::cout << "Result: " << result.as<std::string>() << std::endl;
+        // result = std::get<1>(configIterator->second);
+        // std::cout << "Result: " << result.as<std::string>() << std::endl;
+        // result = std::get<3>(configIterator->second);
+        // std::cout << "Result: " << result.as<std::string>() << std::endl;
+        // result = std::get<4>(configIterator->second);
+        // std::cout << "Result: " << result.as<std::string>() << std::endl;
 
         return std::get<2>(configIterator->second)(_config);
     }
