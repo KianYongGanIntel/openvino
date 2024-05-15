@@ -676,7 +676,8 @@ NetworkDescription LevelZeroCompilerInDriver<TableExtension>::compileIR(const st
                                                                         const Config& config) const {
     _logger.setLevel(config.get<LOG_LEVEL>());
     _logger.debug("compileIR");
-
+    std::cout << "KY-DEBUG compileIR get_friendly_name () : " << model->get_friendly_name() << std::endl;
+    
     ze_device_graph_properties_t deviceGraphProperties{};
     auto result = _graphDdiTableExt->pfnDeviceGetGraphProperties(_deviceHandle, &deviceGraphProperties);
     if (ZE_RESULT_SUCCESS != result) {
@@ -700,6 +701,7 @@ NetworkDescription LevelZeroCompilerInDriver<TableExtension>::compileIR(const st
     buildFlags += serializeConfig(config, compilerVersion);
 
     _logger.debug("compileIR Build flags : %s", buildFlags.c_str());
+    std::cout << "KY-DEBUG compileIR compileIR Build flags : " << buildFlags.c_str() << std::endl;
     // TODO #-30202 Store graph_handle inside NetworkDesc instead of blob. But this will require changes in zeroAPI
 
     // Graph handle should be used only in scope of compile / parse functions.
@@ -776,6 +778,7 @@ NetworkMetadata LevelZeroCompilerInDriver<TableExtension>::parseBlob(const std::
     OV_ITT_TASK_CHAIN(PARSE_BLOB, itt::domains::NPUPlugin, "LevelZeroCompilerInDriver::parseBlob", "desc");
     _logger.setLevel(config.get<LOG_LEVEL>());
     _logger.debug("getNetworkMeta");
+    std::cout << "\n\nKY-DEBUG parseBlob\n " << std::endl;
     ze_graph_handle_t graphHandle;
 
     if (!blob.empty()) {
@@ -996,7 +999,7 @@ void LevelZeroCompilerInDriver<TableExtension>::getMetadata(TableExtension* grap
 
         std::string str = metadata.friendly_name; //result 
         str = str + " - " + metadata.input_name; // concat
-        
+
         str = str + " - " + arg.name; // concat 
         str = str + " - " + arg.debug_friendly_name; //result
 
