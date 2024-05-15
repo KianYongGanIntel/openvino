@@ -192,7 +192,7 @@ ov::Any CompiledModel::get_property(const std::string& name) const {
     if (configIterator != _properties.cend()) {
         std::cout << "KY-DEBUG get_property configIterator NOT empty ! " << std::endl;
         // this one causing return not correct ?
-        auto result = std::get<2>(configIterator->second)(_config);
+        auto result = std::get<2>(configIterator->second)(_config); // this is the same as _networkPtr->metadata.name  "result"
         std::cout << "Result: " << result.as<std::string>() << std::endl;
 
         // result = std::get<0>(configIterator->second);

@@ -14,6 +14,7 @@
 #include "intel_npu/al/prefix.hpp"
 #include "intel_npu/utils/zero/zero_result.hpp"
 #include "openvino/core/model.hpp"
+#include <string>
 
 namespace {
 
@@ -920,7 +921,10 @@ static void getNodeDescriptor(IONodeDescriptorMap& nodeDescriptors,
     // nodeDescriptors[arg.debug_friendly_name] =
     //     {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
 
-    names.push_back(arg.debug_friendly_name);
+    // names.push_back(arg.debug_friendly_name);
+    std::string ans = std::string(arg.name) + " - " + std::string(arg.debug_friendly_name);
+    names.push_back("KY-ANS! " + ans);
+    
     nodeDescriptors[arg.debug_friendly_name] =
         {legacyName, arg.debug_friendly_name, std::move(outputTensorNames), precision, shape, shape};
 }
