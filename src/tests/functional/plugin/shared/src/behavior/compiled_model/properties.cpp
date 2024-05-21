@@ -250,6 +250,22 @@ TEST_P(OVClassCompiledModelGetPropertyTest, GetMetricNoThrow_NETWORK_NAME) {
     ASSERT_EXEC_METRIC_SUPPORTED(ov::model_name);
 }
 
+TEST_P(OVClassCompiledModelGetPropertyTest, GetMetricNoThrow_NETWORK_NAME_OF_BLOB) {
+    ov::Core ie = ov::test::utils::create_core();
+
+    std::stringstream stream;
+    {
+        auto compiled_model = ie.compile_model(simpleNetwork, target_device);
+        compiled_model.export_model(stream);
+    }
+    auto compiled_model = ie.import_model(stream, target_device);
+    std::string model_name;
+    OV_ASSERT_NO_THROW(model_name = compiled_model.get_property(ov::model_name));
+    std::cout << "Compiled model name get_property : " << std::endl << model_name << std::endl;
+    ASSERT_EQ(simpleNetwork->get_friendly_name(), model_name);
+    ASSERT_EXEC_METRIC_SUPPORTED(ov::model_name);
+}
+
 TEST_P(OVClassCompiledModelGetPropertyTest, GetMetricNoThrow_OPTIMAL_NUMBER_OF_INFER_REQUESTS) {
     ov::Core ie = ov::test::utils::create_core();
 

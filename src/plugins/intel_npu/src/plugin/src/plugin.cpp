@@ -648,7 +648,54 @@ std::shared_ptr<ov::ICompiledModel> Plugin::import_model(std::istream& stream, c
 
         auto meta = compiler->parse(blob, localConfig);
         meta.name = "net" + std::to_string(_compiledModelLoadCounter++);
+        std::cout << "KY-DEBUG net get : !!!! "<< meta.name << std::endl;
+        // std::string line;
+        // std::cout << "KY-DEBUG read !!!! " << std::endl;
 
+        // stream.seekg(0, std::ios::beg); // Reset position to beginning of stream
+        // // Assuming stream is your std::istream that contains the binary data
+        // std::stringstream buffer;
+        // buffer << stream.rdbuf();
+        // std::string xmlData = buffer.str();
+
+        // pugi::xml_document doc;
+        // pugi::xml_parse_result result = doc.load_string(xmlData.c_str());
+        // std::cout << "KY-DEBUG xmlData : " << xmlData.c_str() << std::endl;
+        // if (result) {
+        //     pugi::xml_node netNode = doc.child("net");
+        //     if (netNode) {
+        //         std::string netName = netNode.attribute("name").value();
+        //         std::cout << "Net name: " << netName << std::endl;
+        //     }
+        // }
+        // -----------------------------------
+
+        // std::ostringstream oss;
+        // std::string searchString = "net name=\"";
+        // char ch;
+        // int count = 0;
+        // while (stream.get(ch)) {
+        //     oss << ch;
+        //     std::string line = oss.str();
+        //     count++;
+        //     std::cout << oss.str() << std::endl;
+        //     if (count % 16 == 0) { // End of line
+        //         std::string line = oss.str();
+        //         size_t startPos = line.find(searchString);
+        //         if (startPos != std::string::npos) {
+        //             startPos += searchString.length(); // Move startPos to the beginning of the name
+        //             size_t endPos = line.find("\"", startPos); // Find the end of the name
+        //             if (endPos != std::string::npos) {
+        //                 std::string name = line.substr(startPos, endPos - startPos);
+        //                 std::cout << "KY-DEBUG MODEL_NAME CAPTURE HERE : " << name << std::endl;
+        //             }
+        //         }
+        //     }
+        //     else{
+        //             oss.str(""); // Clear ostringstream
+        //     }
+        // }
+        
         const std::shared_ptr<ov::Model> modelDummy = create_dummy_model(meta.parameters,
                                                                          meta.results,
                                                                          meta.inputNames,
@@ -656,6 +703,9 @@ std::shared_ptr<ov::ICompiledModel> Plugin::import_model(std::istream& stream, c
                                                                          _backends->isBatchingSupported());
 
         bool profiling = localConfig.get<PERF_COUNT>();
+        std::cout << "KY-DEBUG import_model modelDummy !!!!  friendly_name :" << modelDummy->get_friendly_name()
+                  << std::endl;
+        // meta.name = modelDummy->get_friendly_name();
 
         auto networkDescription = std::make_shared<const NetworkDescription>(std::move(blob), std::move(meta));
 
@@ -665,6 +715,10 @@ std::shared_ptr<ov::ICompiledModel> Plugin::import_model(std::istream& stream, c
                                                         device,
                                                         profiling ? std::optional(compiler) : std::nullopt,
                                                         localConfig);
+        std::cout << "KY-DEBUG import_model compileModel !!!!  friendly_name :" << compiledModel->get_runtime_model()->get_friendly_name()
+                  << std::endl;
+        // meta.name = compiledModel->get_runtime_model()->get_friendly_name();
+
     } catch (const std::exception& ex) {
         OPENVINO_THROW("Can't import network: ", ex.what());
     } catch (...) {
