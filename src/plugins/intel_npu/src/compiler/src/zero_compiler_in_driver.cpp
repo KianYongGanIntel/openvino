@@ -6,7 +6,7 @@
 
 #include <regex>
 #include <string_view>
-
+#include <iostream>
 #include "intel_npu/al/config/common.hpp"
 #include "intel_npu/al/config/runtime.hpp"
 #include "intel_npu/al/itt.hpp"
@@ -817,6 +817,7 @@ NetworkMetadata LevelZeroCompilerInDriver<TableExtension>::parseBlob(const std::
                        std::hex,
                        uint64_t(result));
     }
+    std::cout << "KY-DEBUG parseBlob here ! before set to net6 : "<< networkMeta.name <<std::endl;
 
     return networkMeta;
 }

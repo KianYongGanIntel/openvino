@@ -645,10 +645,10 @@ std::shared_ptr<ov::ICompiledModel> Plugin::import_model(std::istream& stream, c
         }
         std::vector<uint8_t> blob(graphSize);
         stream.read(reinterpret_cast<char*>(blob.data()), graphSize);
-
+        std::cout << "KY-DEBUG callling parse()! !!!! " << std::endl;
         auto meta = compiler->parse(blob, localConfig);
         meta.name = "net" + std::to_string(_compiledModelLoadCounter++);
-        std::cout << "KY-DEBUG net get : !!!! "<< meta.name << std::endl;
+        std::cout << "KY-DEBUG net get from import_model: !!!! "<< meta.name << std::endl;
         // std::string line;
         // std::cout << "KY-DEBUG read !!!! " << std::endl;
 
