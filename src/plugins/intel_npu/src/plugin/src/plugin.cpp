@@ -648,7 +648,7 @@ std::shared_ptr<ov::ICompiledModel> Plugin::import_model(std::istream& stream, c
         std::cout << "KY-DEBUG import_model -> callling parse()! !!!! " << std::endl;
         auto meta = compiler->parse(blob, localConfig);
         std::cout << "KY-DEBUG print meta.name after parse !!!! "<< meta.name << std::endl;
-        meta.name = "net" + std::to_string(_compiledModelLoadCounter++);
+        // meta.name = "net" + std::to_string(_compiledModelLoadCounter++);
         std::cout << "KY-DEBUG print meta.name after rename !!!! "<< meta.name << std::endl;
         // std::string line;
         // std::cout << "KY-DEBUG read !!!! " << std::endl;
