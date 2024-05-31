@@ -6,7 +6,7 @@
 
 #include <fstream>
 #include <string_view>
-
+#include <iostream>
 #include "async_infer_request.hpp"
 #include "intel_npu/al/config/common.hpp"
 #include "intel_npu/al/config/compiler.hpp"
@@ -129,6 +129,7 @@ std::shared_ptr<ov::ISyncInferRequest> CompiledModel::create_sync_infer_request(
 
 void CompiledModel::export_model(std::ostream& stream) const {
     const auto& blob = _networkPtr->compiledNetwork;
+    std::cout <<"KY-DEBUG export_model _networkPtr->metadata.name : "  << _networkPtr->metadata.name << std::endl;
     stream.write(reinterpret_cast<const char*>(blob.data()), blob.size());
 
     std::stringstream str;
