@@ -132,6 +132,9 @@ void CompiledModel::export_model(std::ostream& stream) const {
     std::cout <<"KY-DEBUG export_model _networkPtr->metadata.name : "  << _networkPtr->metadata.name << std::endl;
     stream.write(reinterpret_cast<const char*>(blob.data()), blob.size());
 
+    const auto& blob2 = _networkPtr->metadata.name;
+    stream.write(reinterpret_cast<const char*>(blob2.data()), blob2.size());
+
     std::stringstream str;
     str << "Blob size: " << blob.size() << ", hash: " << std::hex << hash(blob);
     _logger.info(str.str().c_str());
