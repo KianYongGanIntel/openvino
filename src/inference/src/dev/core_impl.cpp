@@ -4,6 +4,15 @@
 
 #include "core_impl.hpp"
 
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <chrono>
+#include <cstring>
+#include <fstream>
+#include <iostream>
 #include <memory>
 
 #include "check_network_batchable.hpp"
@@ -30,13 +39,6 @@
 #include "openvino/util/shared_object.hpp"
 #include "openvino/util/xml_parse_utils.hpp"
 #include "ov_plugins.hpp"
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cstring>
-#include <iostream>
-#include <fstream>
 #ifdef PROXY_PLUGIN_ENABLED
 #    include "openvino/proxy/plugin.hpp"
 #    include "openvino/proxy/properties.hpp"
@@ -734,10 +736,19 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::shared_ptr<
 
     auto parsed = parseDeviceNameIntoConfig(deviceName, config_with_batch, is_proxy_device(device_name));
     auto plugin = get_plugin(parsed._deviceName);
+    std::cout << "KY-DEBUG (Model)compile_model checking cache" << std::endl;
+
     ov::SoPtr<ov::ICompiledModel> res;
     auto cacheManager = coreConfig.get_cache_config_for_device(plugin, parsed._config)._cacheManager;
+
+    std::cout << "KY-DEBUG cacheManager is " << (cacheManager ? "true" : "false") << std::endl;
+    std::cout << "KY-DEBUG device_supports_model_caching is "
+              << (device_supports_model_caching(plugin) ? "true" : "false") << std::endl;
+    std::cout << "KY-DEBUG is_proxy_device is " << (!is_proxy_device(plugin) ? "true" : "false") << std::endl;
+
     // Skip caching for proxy plugin. HW plugin will load network from the cache
     if (cacheManager && device_supports_model_caching(plugin) && !is_proxy_device(plugin)) {
+        std::cout << "KY-DEBUG (Model)OV Cache support !" << std::endl;
         CacheContent cacheContent{cacheManager};
         cacheContent.blobId = ov::ModelCache::compute_hash(model, create_compile_config(plugin, parsed._config));
         std::unique_ptr<CacheGuardEntry> lock = cacheGuard.get_hash_lock(cacheContent.blobId);
@@ -749,6 +760,7 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::shared_ptr<
                                            cacheContent);
         });
     } else {
+        std::cout << "KY-DEBUG (Model)OV Cache not supported !" << std::endl;
         res = plugin.compile_model(model, parsed._config);
     }
     return res;
@@ -768,6 +780,7 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::shared_ptr<
     auto parsed = parseDeviceNameIntoConfig(deviceName, config_with_batch, is_proxy_device(deviceName));
     auto plugin = get_plugin(parsed._deviceName);
     ov::SoPtr<ov::ICompiledModel> res;
+    std::cout << "KY-DEBUG (Context)compile_model checking cache" << std::endl;
     auto cacheManager = coreConfig.get_cache_config_for_device(plugin, parsed._config)._cacheManager;
     // Skip caching for proxy plugin. HW plugin will load network from the cache
     if (cacheManager && device_supports_model_caching(plugin) && !is_proxy_device(plugin)) {
@@ -783,6 +796,28 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::shared_ptr<
     return res;
 }
 
+// Helper function to create a temporary file from mmaped data
+std::string create_temp_file_from_mmap(const char* mmap_data, size_t size) {
+    // Create a temporary file
+    char temp_filename[] = "/tmp/modelXXXXXX";
+    int temp_fd = mkstemp(temp_filename);
+    if (temp_fd == -1) {
+        throw std::runtime_error("Failed to create temporary file");
+    }
+
+    // Write mmaped data to the temporary file
+    if (write(temp_fd, mmap_data, size) != size) {
+        close(temp_fd);
+        throw std::runtime_error("Failed to write to temporary file");
+    }
+
+    // Close the file descriptor
+    close(temp_fd);
+
+    // Return the path of the temporary file
+    return std::string(temp_filename);
+}
+
 ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::string& model_path,
                                                           const std::string& device_name,
                                                           const ov::AnyMap& config) const {
@@ -791,10 +826,16 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::string& mod
     // in case of compile_model(file_name), we need to clear-up core-level properties
     auto plugin = get_plugin(parsed._deviceName);
     ov::SoPtr<ov::ICompiledModel> compiled_model;
-
+    std::cout << "KY-DEBUG (Model_Path)compile_model checking cache" << std::endl;
     auto cacheManager = coreConfig.get_cache_config_for_device(plugin, parsed._config)._cacheManager;
 
+    std::cout << "KY-DEBUG cacheManager is " << (cacheManager ? "true" : "false") << std::endl;
+    std::cout << "KY-DEBUG device_supports_model_caching is "
+              << (device_supports_model_caching(plugin) ? "true" : "false") << std::endl;
+    std::cout << "KY-DEBUG is_proxy_device is " << (!is_proxy_device(plugin) ? "true" : "false") << std::endl;
+
     if (cacheManager && device_supports_model_caching(plugin) && !is_proxy_device(plugin)) {
+        std::cout << "KY-DEBUG (Model_Path)OV Cache supported !" << std::endl;
         // Skip caching for proxy plugin. HW plugin will load network from the cache
         CacheContent cacheContent{cacheManager, model_path};
         cacheContent.blobId = ov::ModelCache::compute_hash(model_path, create_compile_config(plugin, parsed._config));
@@ -805,7 +846,35 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::string& mod
                 return compile_model_and_cache(plugin, model, parsed._config, {}, cacheContent);
             });
     } else {
-        compiled_model = plugin.compile_model(model_path, parsed._config);
+        std::cout << "KY-DEBUG (Model_Path)OV Cache not supported !" << std::endl;
+        // Map the model file into memory
+        int fd = open(model_path.c_str(), O_RDONLY);
+        if (fd == -1) {
+            throw std::runtime_error("Failed to open model file");
+        }
+
+        struct stat sb;
+        if (fstat(fd, &sb) == -1) {
+            close(fd);
+            throw std::runtime_error("Failed to get file size");
+        }
+
+        void* mapped = mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+        if (mapped == MAP_FAILED) {
+            close(fd);
+            throw std::runtime_error("Failed to map model file");
+        }
+
+        // Create a temporary file from the mmaped data
+        std::string temp_model_path = create_temp_file_from_mmap(static_cast<const char*>(mapped), sb.st_size);
+
+        // Use the temporary file path with read_model
+        compiled_model = plugin.compile_model(temp_model_path, parsed._config);
+
+        // Cleanup
+        munmap(mapped, sb.st_size);
+        close(fd);
+        remove(temp_model_path.c_str());  // Ensure the temporary file is deleted
     }
     return compiled_model;
 }
@@ -819,10 +888,11 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::string& mod
     // in case of compile_model(file_name), we need to clear-up core-level properties
     auto plugin = get_plugin(parsed._deviceName);
     ov::SoPtr<ov::ICompiledModel> compiled_model;
-
+    std::cout << "KY-DEBUG (Model_Str)OV Cache check !" << std::endl;
     auto cacheManager = coreConfig.get_cache_config_for_device(plugin, parsed._config)._cacheManager;
     // Skip caching for proxy plugin. HW plugin will load network from the cache
     if (cacheManager && device_supports_model_caching(plugin) && !is_proxy_device(plugin)) {
+        std::cout << "KY-DEBUG (Model_Str)OV Cache supported !" << std::endl;
         CacheContent cacheContent{cacheManager};
         cacheContent.blobId =
             ov::ModelCache::compute_hash(model_str, weights, create_compile_config(plugin, parsed._config));
@@ -837,6 +907,7 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model(const std::string& mod
                                                cacheContent);
             });
     } else {
+        std::cout << "KY-DEBUG (Model_Str)OV Cache not supported !" << std::endl;
         auto model = read_model(model_str, weights);
         compiled_model = plugin.compile_model(model, parsed._config);
     }
@@ -848,6 +919,7 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::import_model(std::istream& model,
                                                          const ov::AnyMap& config) const {
     OV_ITT_SCOPED_TASK(ov::itt::domains::OV, "Core::import_model");
     auto parsed = parseDeviceNameIntoConfig(device_name, config);
+    std::cout << "KY-DEBUG (istream) import_model !" << std::endl;
     return get_plugin(parsed._deviceName).import_model(model, parsed._config);
 }
 
@@ -1367,6 +1439,7 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::compile_model_and_cache(ov::Plugin& 
                                                                     const ov::SoPtr<ov::IRemoteContext>& context,
                                                                     const CacheContent& cacheContent) const {
     OV_ITT_SCOPED_TASK(ov::itt::domains::OV, "CoreImpl::compile_model_and_cache");
+    std::cout << "KY-DEBUG (Model)Compile model and cache!" << std::endl;
     ov::SoPtr<ov::ICompiledModel> compiled_model =
         context ? plugin.compile_model(model, context, parsedConfig) : plugin.compile_model(model, parsedConfig);
     if (cacheContent.cacheManager && device_supports_model_caching(plugin)) {
@@ -1402,30 +1475,41 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::load_model_from_cache(
     struct HeaderException {};
 
     OPENVINO_ASSERT(cacheContent.cacheManager != nullptr);
+
+    std::cout << "KY-DEBUG Try read OV cache ! load_model_from_cache : "<< cacheContent.blobId << std::endl;
+    // Start measuring time
+    auto start = std::chrono::high_resolution_clock::now();
     try {
         cacheContent.cacheManager->read_cache_entry(cacheContent.blobId, [&](std::istream& networkStream) {
+            std::cout << "KY-DEBUG Cache Found ! : "<< cacheContent.blobId << std::endl;
             OV_ITT_SCOPE(FIRST_INFERENCE,
                          ov::itt::domains::LoadTime,
                          "Core::load_model_from_cache::ReadStreamAndImport");
-            
-            void* map;    
+
+            // //---------------------------------
+            void* map;
             struct stat sb; // Obtain the size of the file
             int fd = -1 ;
             std::istringstream mappedStream;
+            // //=================================
 
             try {
                 ov::CompiledBlobHeader header;
                 networkStream >> header;
 
+                // // //---------------------------------
                 // Open the cache file
                 fd = open(cacheContent.modelPath.c_str(), O_RDONLY);
                 if (fd == -1) {
                     throw std::runtime_error("Failed to open cache file");
                 }
+                std::cout << "KY-DEBUG Open Cache File" << std::endl;
+
                 if (fstat(fd, &sb) == -1) {
                     close(fd);
                     throw std::runtime_error("Failed to obtain file size");
                 }
+                std::cout << "KY-DEBUG File Size cant determine" << std::endl;
 
                 // Create a file mapping
                 map = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
@@ -1433,6 +1517,8 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::load_model_from_cache(
                     close(fd);
                     throw std::runtime_error("Failed to map cache file");
                 }
+                std::cout << "KY-DEBUG Create fileMapping Done" << std::endl;
+                // // //=================================
 
                 if (header.get_file_info() != ov::ModelCache::calculate_file_info(cacheContent.modelPath)) {
                     munmap(map, sb.st_size);
@@ -1440,6 +1526,7 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::load_model_from_cache(
                     // Original file is changed, don't use cache
                     OPENVINO_THROW("Original model file is changed");
                 }
+                std::cout << "KY-DEBUG Original mode file changed" << std::endl;
 
                 if (util::contains(plugin.get_property(ov::internal::supported_properties),
                                    ov::internal::compiled_model_runtime_properties_supported.name())) {
@@ -1462,24 +1549,38 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::load_model_from_cache(
                     }
                 }
 
+                std::cout << "KY-DEBUG mapping stream object" << std::endl;
+                // // //---------------------------------
                 // Use the mapped memory as an input stream
                 std::string mappedContent(static_cast<char*>(map), sb.st_size);
                 mappedStream = std::istringstream(mappedContent);
+                // // //=================================
+
             } catch (...) {
-                if (map != MAP_FAILED) 
+                // // //---------------------------------
+                if (map != MAP_FAILED)
                     munmap(map, sb.st_size);
-                if (fd != -1) 
+                if (fd != -1)
                     close(fd);
+                // // //=================================
                 throw HeaderException();
             }
             ov::AnyMap update_config = config;
             update_config[ov::loaded_from_cache.name()] = true;
+            std::cout << "KY-DEBUG plugin -> import_model" << std::endl;
+
+            // ====-------==========----------------==========-----------------
+            // compiled_model = context ? plugin.import_model(networkStream, context, update_config)
+            //                          : plugin.import_model(networkStream, update_config);
+            // //---------------------------------
             compiled_model = context ? plugin.import_model(mappedStream, context, update_config)
                                          : plugin.import_model(mappedStream, update_config);
-                
+
             // Clean up
             munmap(map, sb.st_size);
             close(fd);
+            std::cout << "KY-DEBUG load_model_from_cache ! Successful" << std::endl;
+            // //=================================
         });
     } catch (const HeaderException&) {
         // For these exceptions just remove old cache and set that import didn't work
@@ -1491,8 +1592,16 @@ ov::SoPtr<ov::ICompiledModel> ov::CoreImpl::load_model_from_cache(
     }
 
     // fallback scenario
-    if (!compiled_model)
+    if (!compiled_model){
+         std::cout << "KY-DEBUG Fail to load model from cache" << std::endl;
         compiled_model = compile_model_lambda();
+    }
+
+    // Stop measuring time and calculate the elapsed time
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+
+    std::cout << "KY-DEBUG Time taken by function: " << duration.count() << " microseconds" << std::endl;
 
     return compiled_model;
 }
