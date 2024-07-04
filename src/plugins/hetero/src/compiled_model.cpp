@@ -19,6 +19,7 @@
 #include "openvino/util/xml_parse_utils.hpp"
 #include "plugin.hpp"
 #include "properties.hpp"
+#include <iostream>
 
 ov::hetero::CompiledModel::CompiledModel(const std::shared_ptr<ov::Model>& model,
                                          const std::shared_ptr<const ov::IPlugin>& plugin,
@@ -28,6 +29,7 @@ ov::hetero::CompiledModel::CompiledModel(const std::shared_ptr<ov::Model>& model
       m_name(model->get_friendly_name()),
       m_loaded_from_cache(false) {
     try {
+        std::cout <<"KY-DEBUG Hetero compiledModel constructor" <<std::endl;
         compile_model(model);
     } catch (const std::exception& e) {
         OPENVINO_THROW("Standard exception from compilation library: ", e.what());
@@ -37,6 +39,7 @@ ov::hetero::CompiledModel::CompiledModel(const std::shared_ptr<ov::Model>& model
 }
 
 void ov::hetero::CompiledModel::compile_model(const std::shared_ptr<ov::Model>& model) {
+    std::cout <<"KY-DEBUG Hetero compiledModel calling compie_model" <<std::endl;
     ov::SupportedOpsMap query_model_result;
     bool user_set_affinities = false;
     // Get user defined affinity
