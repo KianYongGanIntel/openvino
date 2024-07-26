@@ -844,9 +844,9 @@ NetworkDescription LevelZeroCompilerInDriver<TableExtension>::compile(const std:
 
     // Graph handle should be used only in scope of compile / parse functions.
     ze_graph_handle_t graphHandle;
-
+    printf ("KY-DEBUG memory start allocate \n");
     result = seriazlideIRModelAndCreateGraph(model, config, deviceGraphProperties, graphHandle);
-
+    printf ("KY-DEBUG memory release \n");
     OPENVINO_ASSERT(result == ZE_RESULT_SUCCESS,
                     "Failed to compile network. L0 createGraph",
                     " result: ",
