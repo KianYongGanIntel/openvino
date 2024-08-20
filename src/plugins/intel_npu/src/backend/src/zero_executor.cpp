@@ -107,13 +107,13 @@ ZeroExecutor::ZeroExecutor(const std::shared_ptr<const ZeroInitStructsHolder>& i
     } else {
         _logger.info("Reuse graphhandle created from compiler");
         try {
-            _graph = static_cast<ze_graph_handle_t>(_networkDesc->metadata.graphHandle);
+            _graph = *static_cast<ze_graph_handle_t*>(_networkDesc->metadata.graphHandle);
             // from compiler
-            _props = *static_cast<ze_graph_properties_t*>(_networkDesc->propsVoidPtr);
+            _props = *static_cast<ze_graph_properties_t*>(_networkDesc->metadata.propsVoidPtr);
             _input_descriptors =
-                *static_cast<std::vector<intel_npu::ZeroExecutor::ArgumentDescriptor>*>(_networkDesc->inputDescriptors);
+                *static_cast<std::vector<intel_npu::ZeroExecutor::ArgumentDescriptor>*>(_networkDesc->metadata.inputDescriptors);
             _output_descriptors = *static_cast<std::vector<intel_npu::ZeroExecutor::ArgumentDescriptor>*>(
-                _networkDesc->outputDescriptors);
+                _networkDesc->metadata.outputDescriptors);
         } catch (const std::exception& e) {
             _logger.error("Failed to get cast and get obj from network description return from compiler, ", e.what());
         }

@@ -113,7 +113,10 @@ struct NetworkMetadata final {
     size_t numStreams = 1;
 
     // use to pass graphHandle from compiler to backend executor
-    void* graphHandle = nullptr;
+    void* graphHandle = nullptr;    
+    void* propsVoidPtr = nullptr;
+    void* inputDescriptors = nullptr;
+    void* outputDescriptors = nullptr;
 
     /**
      * @brief Binds the (state input, state output) and (dynamic tensor, shape tensor) pairs using the
@@ -145,13 +148,9 @@ struct NetworkDescription final {
     NetworkDescription& operator=(NetworkDescription&&) = default;
     ~NetworkDescription() = default;
 
-    std::vector<uint8_t> compiledNetwork;
+    mutable std::vector<uint8_t> compiledNetwork;
 
     NetworkMetadata metadata;
-
-    void* propsVoidPtr = nullptr;
-    void* inputDescriptors = nullptr;
-    void* outputDescriptors = nullptr;
 };
 
 /**

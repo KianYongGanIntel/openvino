@@ -336,10 +336,14 @@ std::string LevelZeroCompilerInDriver<TableExtension>::serializeIOInfo(const std
 
 template <typename TableExtension>
 void LevelZeroCompilerInDriver<TableExtension>::release(std::shared_ptr<const NetworkDescription> networkDescription) {
+    printf(" Debug - KY - release start\n");
+    
     if (networkDescription->metadata.graphHandle != nullptr) {
-        result = _graphDdiTableExt->pfnDestroy(networkDescription->metadata.graphHandle);
-
+        printf(" Debug - KY - release checkpoint 1 \n");
+        auto result = _graphDdiTableExt->pfnDestroy(*static_cast<ze_graph_handle_t*>(networkDescription->metadata.graphHandle));
+        printf(" Debug - KY - release checkpoint 2 \n");
         if (ZE_RESULT_SUCCESS != result) {
+            printf(" Debug - KY - release checkpoint 3 \n");
             _logger.error("Failed to release graph handle. L0 pfnDestroy",
                           " result: ",
                           ze_result_to_string(result),
@@ -347,19 +351,23 @@ void LevelZeroCompilerInDriver<TableExtension>::release(std::shared_ptr<const Ne
                           std::hex,
                           uint64_t(result));
         }
+        printf(" Debug - KY - release checkpoint 4 \n");
     }
+
+    printf(" Debug - KY - release done\n");
 }
 
 template <typename TableExtension>
 void LevelZeroCompilerInDriver<TableExtension>::fillCompiledNetwork(
     std::shared_ptr<const NetworkDescription> networkDescription) {
+        printf (" Debug - KY fillCompiledNetwork blob 0 \n");
     if (networkDescription->metadata.graphHandle != nullptr) {
         ze_graph_handle_t graphHandle = static_cast<ze_graph_handle_t>(networkDescription->metadata.graphHandle);
 
         // Get blob size first
         size_t blobSize = -1;
 
-        result = _graphDdiTableExt->pfnGetNativeBinary(graphHandle, &blobSize, nullptr);
+        auto result = _graphDdiTableExt->pfnGetNativeBinary(graphHandle, &blobSize, nullptr);
 
         OPENVINO_ASSERT(result == ZE_RESULT_SUCCESS,
                         "Failed to compile network. L0 pfnGetNativeBinary get blob size",
@@ -370,11 +378,11 @@ void LevelZeroCompilerInDriver<TableExtension>::fillCompiledNetwork(
                         uint64_t(result),
                         ". ",
                         getLatestBuildError());
-
+        printf (" Debug - KY fillCompiledNetwork blob 1 \n");
         std::vector<uint8_t> blob(blobSize);
         // Get blob data
         result = _graphDdiTableExt->pfnGetNativeBinary(graphHandle, &blobSize, blob.data());
-
+        printf (" Debug - KY fillCompiledNetwork blob 2 \n");
         OPENVINO_ASSERT(result == ZE_RESULT_SUCCESS,
                         "Failed to compile network. L0 pfnGetNativeBinary get blob data",
                         " result: ",
@@ -386,6 +394,7 @@ void LevelZeroCompilerInDriver<TableExtension>::fillCompiledNetwork(
                         getLatestBuildError());
 
         networkDescription->compiledNetwork = std::move(blob);
+        printf (" Debug - KY fillCompiledNetwork blob 3 \n");
     }
 }
 
@@ -906,16 +915,24 @@ NetworkDescription LevelZeroCompilerInDriver<TableExtension>::compile(const std:
 
     auto networkMeta = getNetworkMeta(graphHandle);
     networkMeta.name = model->get_friendly_name();
+    // networkMeta.graphHandle = static_cast<void*>(new ze_graph_handle_t(graphHandle));
+    networkMeta.graphHandle = reinterpret_cast<void*>(new ze_graph_handle_t(graphHandle));
+    networkMeta.propsVoidPtr = const_cast<void*>(static_cast<const void*>(&_props));
+    networkMeta.inputDescriptors = const_cast<void*>(static_cast<const void*>(&inputDescriptors));
+    networkMeta.outputDescriptors = const_cast<void*>(static_cast<const void*>(&outputDescriptors));
+
+    // networkMeta.propsVoidPtr = const_cast<void*>(static_cast<const void*>(&_props));
+    // networkMeta.inputDescriptors = const_cast<void*>(static_cast<const void*>(&inputDescriptors));
+    // networkMeta.outputDescriptors = const_cast<void*>(static_cast<const void*>(&outputDescriptors));
+
+    // // Use const_cast to remove const qualifier
+    // networkDescription.propsVoidPtr = const_cast<void*>(static_cast<const void*>(&_props));
+    // networkDescription.inputDescriptors = const_cast<void*>(static_cast<const void*>(&inputDescriptors));
+    // networkDescription.outputDescriptors = const_cast<void*>(static_cast<const void*>(&outputDescriptors));
 
     _logger.debug("compile end");
 
     auto networkDescription = NetworkDescription(std::vector<uint8_t>(), std::move(networkMeta));
-
-    // Use const_cast to remove const qualifier
-    networkDescription.propsVoidPtr = const_cast<void*>(static_cast<const void*>(&_props));
-    networkDescription.inputDescriptors = const_cast<void*>(static_cast<const void*>(&inputDescriptors));
-    networkDescription.outputDescriptors = const_cast<void*>(static_cast<const void*>(&outputDescriptors));
-
     return networkDescription;
 }
 
@@ -951,7 +968,8 @@ NetworkMetadata LevelZeroCompilerInDriver<TableExtension>::parse(const std::vect
     }
 
     OV_ITT_TASK_NEXT(PARSE_BLOB, "getNetworkMeta");
-    const auto networkMeta = getNetworkMeta(graphHandle);
+    auto networkMeta = getNetworkMeta(graphHandle);
+    //networkMeta.graphHandle=graphHandle;
     OV_ITT_TASK_NEXT(PARSE_BLOB, "NetworkDescription");
 
     _logger.debug("parse end");
@@ -1151,7 +1169,6 @@ NetworkMetadata LevelZeroCompilerInDriver<TableExtension>::getNetworkMeta(ze_gra
     meta.numStreams = 1;
     meta.bindRelatedDescriptors();
     // Store the graph handle as a void pointer, return the same graphHandle to backend for ZeroExecutor
-    meta.graphHandle = static_cast<void*>(graphHandle);
 
     return meta;
 }

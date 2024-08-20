@@ -86,7 +86,7 @@ CompiledModel::CompiledModel(const std::shared_ptr<const ov::Model>& model,
       _config(config),
       _logger("CompiledModel", config.get<LOG_LEVEL>()),
       _device(device),
-      _compiler(compiler) {
+      _compiler(compiler ? *compiler : ov::SoPtr<ICompiler>()) {
     OV_ITT_SCOPED_TASK(itt::domains::NPUPlugin, "CompiledModel::CompiledModel");
     OPENVINO_ASSERT(_networkPtr != nullptr,
                     "NPU CompiledModel: the pointer towards the NetworkDescription object is null");
@@ -103,9 +103,13 @@ CompiledModel::CompiledModel(const std::shared_ptr<const ov::Model>& model,
 
 CompiledModel::~CompiledModel() {
     // Call compiler to destroy graphHandle only if no executor created
+    printf(" Debug - KY - CompiledModel::~CompiledModel checkpoint 1\n");
     if (_executorPtr != nullptr) {
-        _compiler->release(_networkPtr);
+        printf(" Debug - KY - CompiledModel::~CompiledModel checkpoint 1.1\n");
+        //_compiler->release(_networkPtr);
+        printf(" Debug - KY - CompiledModel::~CompiledModel checkpoint 1.2\n");
     }
+    printf(" Debug - KY - CompiledModel::~CompiledModel checkpoint 2\n");
 }
 
 std::shared_ptr<ov::IAsyncInferRequest> CompiledModel::create_infer_request() const {
@@ -135,8 +139,11 @@ std::shared_ptr<ov::ISyncInferRequest> CompiledModel::create_sync_infer_request(
 }
 
 void CompiledModel::export_model(std::ostream& stream) const {
-    if (_networkPtr->compiledNetwork.size() == 0 && networkPtr->metadata.graphHandle != nullptr) {
+    printf(" Debug - KY - export_model start\n");
+    if (_networkPtr->compiledNetwork.size() == 0 && _networkPtr->metadata.graphHandle != nullptr) {
+        printf(" Debug - KY - export_model checkpoint 1\n");
         _compiler->fillCompiledNetwork(_networkPtr);
+        printf(" Debug - KY - export_model checkpoint 2\n");
     }
 
     auto& blob = _networkPtr->compiledNetwork;
@@ -151,10 +158,13 @@ void CompiledModel::export_model(std::ostream& stream) const {
     str << "Blob size: " << blob.size() << ", hash: " << std::hex << hash(blob);
     _logger.info(str.str().c_str());
     // if graphHandle is not null, release blob here to reduce peak mem
-    if (networkPtr->metadata.graphHandle != nullptr) {
+    if (_networkPtr->metadata.graphHandle != nullptr) {
+        printf(" Debug - KY - export_model checkpoint 3\n");
         blob.clear();
         blob.shrink_to_fit();
+        printf(" Debug - KY - export_model checkpoint 4\n");
     }
+    printf(" Debug - KY - export_model Done\n");
 }
 
 std::shared_ptr<const ov::Model> CompiledModel::get_runtime_model() const {
@@ -201,7 +211,7 @@ const Config& CompiledModel::get_config() const {
 }
 
 const ov::SoPtr<ICompiler>& CompiledModel::get_compiler() const {
-    return _compiler.value();
+    return _compiler;
 }
 
 void CompiledModel::configure_stream_executors() {

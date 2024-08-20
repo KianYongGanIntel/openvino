@@ -108,11 +108,15 @@ std::vector<ov::ProfilingInfo> LevelZeroCompilerAdapter::process_profiling_outpu
 }
 
 void LevelZeroCompilerAdapter::release(std::shared_ptr<const NetworkDescription> networkDescription) {
+    printf(" Debug - KY - release start\n");
     apiAdapter->release(networkDescription);
+    printf(" Debug - KY - release end\n");
 }
 
 void LevelZeroCompilerAdapter::fillCompiledNetwork(std::shared_ptr<const NetworkDescription> networkDescription) {
+    printf(" Debug - KY - fillCompiledNetwork start\n");
     apiAdapter->fillCompiledNetwork(networkDescription);
+    printf(" Debug - KY - fillCompiledNetwork end\n");
 }
 
 }  // namespace driverCompilerAdapter
