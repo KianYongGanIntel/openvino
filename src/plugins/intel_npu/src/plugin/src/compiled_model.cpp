@@ -135,7 +135,7 @@ void CompiledModel::export_model(std::ostream& stream) const {
     } else {
         _logger.info("Write blob to stream successfully.");
     }
-
+    printf(" Debug - export model - continue \n");
     std::stringstream str;
     str << "Blob size: " << blob.size() << ", hash: " << std::hex << hash(blob);
     _logger.info(str.str().c_str());
