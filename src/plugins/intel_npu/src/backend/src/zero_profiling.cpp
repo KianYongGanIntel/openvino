@@ -52,8 +52,11 @@ void ProfilingQuery::create(const ze_graph_profiling_pool_handle_t& profiling_po
 }
 
 LayerStatistics ProfilingQuery::getLayerStatistics() const {
+    printf(" Debug - getLayerStatistics start 1 \n");
     verifyProfilingProperties();
+    printf(" Debug - getLayerStatistics start 2 \n");
     auto layerData = getData<ze_profiling_layer_info>();
+    printf(" Debug - getLayerStatistics start 3\n");
     return profiling::convertLayersToIeProfilingInfo(layerData);
 }
 
@@ -77,15 +80,17 @@ template <class ProfilingData>
 std::vector<ProfilingData> ProfilingQuery::getData() const {
     ze_graph_profiling_type_t type = ZeProfilingTypeId<ProfilingData>::value;
     uint32_t size = 0;
-
+    printf(" Debug - getData() start 1 \n");
     // Obtain the size of the buffer
     queryGetData(type, &size, nullptr);
-
+    printf(" Debug - getData() start 2 \n")
     OPENVINO_ASSERT(size % sizeof(ProfilingData) == 0);
-
+    printf(" Debug - getData() start 3 \n")
     // Allocate enough memory and copy the buffer
     std::vector<ProfilingData> profilingData(size / sizeof(ProfilingData));
+    printf(" Debug - getData() start 4 \n")
     queryGetData(type, &size, reinterpret_cast<uint8_t*>(profilingData.data()));
+    printf(" Debug - getData() start 5 \n")
     return profilingData;
 }
 
@@ -100,31 +105,40 @@ void ProfilingQuery::getProfilingProperties(ze_device_profiling_data_properties_
 }
 
 void ProfilingQuery::verifyProfilingProperties() const {
+    printf(" Debug - verifyProfilingProperties() start 1 \n");
     if (!_handle) {
+        printf(" Debug - verifyProfilingProperties() start 1.1 \n");
         OPENVINO_THROW("Can't get profiling statistics because profiling is disabled.");
     }
+    printf(" Debug - verifyProfilingProperties() start 2 \n");
     const auto stringifyVersion = [](auto version) -> std::string {
         return std::to_string(ZE_MAJOR_VERSION(version)) + "." + std::to_string(ZE_MINOR_VERSION(version));
     };
 
     ze_device_profiling_data_properties_t profProp;
+    printf(" Debug - verifyProfilingProperties() start 3 \n");
     getProfilingProperties(&profProp);
+    printf(" Debug - verifyProfilingProperties() start 4 \n");
     const auto currentProfilingVersion = ze_profiling_data_ext_version_t::ZE_PROFILING_DATA_EXT_VERSION_CURRENT;
-
+    printf(" Debug - verifyProfilingProperties() start 5 \n");
     if (ZE_MAJOR_VERSION(profProp.extensionVersion) != ZE_MAJOR_VERSION(currentProfilingVersion)) {
+        printf(" Debug - verifyProfilingProperties() start 5.1 \n");
         OPENVINO_THROW("Unsupported NPU driver.",
                        "Profiling API version: plugin: ",
                        stringifyVersion(currentProfilingVersion),
                        ", driver: ",
                        stringifyVersion(profProp.extensionVersion));
     }
+    printf(" Debug - verifyProfilingProperties() start 6 \n");
     if (currentProfilingVersion > profProp.extensionVersion) {
+        printf(" Debug - verifyProfilingProperties() start 6.1 \n");
         auto log = Logger::global().clone("ZeroProfilingQuery");
         log.warning("Outdated NPU driver detected. Some features might not be available! "
                     "Profiling API version: plugin: %s, driver: %s",
                     stringifyVersion(currentProfilingVersion).c_str(),
                     stringifyVersion(profProp.extensionVersion).c_str());
     }
+    printf(" Debug - verifyProfilingProperties() start 7 \n");
 }
 
 NpuInferStatistics NpuInferProfiling::getNpuInferStatistics() const {
