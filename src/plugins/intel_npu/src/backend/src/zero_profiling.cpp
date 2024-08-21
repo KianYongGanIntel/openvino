@@ -83,14 +83,14 @@ std::vector<ProfilingData> ProfilingQuery::getData() const {
     printf(" Debug - getData() start 1 \n");
     // Obtain the size of the buffer
     queryGetData(type, &size, nullptr);
-    printf(" Debug - getData() start 2 \n")
+    printf(" Debug - getData() start 2 \n");
     OPENVINO_ASSERT(size % sizeof(ProfilingData) == 0);
-    printf(" Debug - getData() start 3 \n")
+    printf(" Debug - getData() start 3 \n");
     // Allocate enough memory and copy the buffer
     std::vector<ProfilingData> profilingData(size / sizeof(ProfilingData));
-    printf(" Debug - getData() start 4 \n")
+    printf(" Debug - getData() start 4 \n");
     queryGetData(type, &size, reinterpret_cast<uint8_t*>(profilingData.data()));
-    printf(" Debug - getData() start 5 \n")
+    printf(" Debug - getData() start 5 \n");
     return profilingData;
 }
 
