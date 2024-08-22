@@ -13,7 +13,8 @@
 /**
  * @brief Last version of Table of Graph Extension functions used within plugin
  */
-using ze_graph_dditable_ext_last_t = ze_graph_dditable_ext_1_5_t;
+// using ze_graph_dditable_ext_last_t = ze_graph_dditable_ext_1_5_t;
+using ze_graph_dditable_ext_last_t = ze_graph_dditable_ext_1_6_t;
 
 /**
  * @brief Table of Graph Extension functions pointers and function wrappers
