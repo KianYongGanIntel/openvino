@@ -196,22 +196,73 @@ LevelZeroCompilerInDriver<TableExtension>::LevelZeroCompilerInDriver(ze_driver_h
     _deviceHandle = deviceHandle;
 
     // ze_graph_dditable_ext_last_t = ze_graph_dditable_ext_1_6_t;
-    if (std::is_same<TableExtension, ze_graph_dditable_ext_1_6_t>::value){
-        printf(" Debug - ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_6_t\n");
-    }else{
-        printf(" Debug - ze_graph_dditable_ext_last_t  != ze_graph_dditable_ext_1_6_t\n");
+    if (std::is_same<TableExtension, ze_graph_dditable_ext_1_6_t>::value) {
+        printf(" Debug - LevelZeroCompilerInDriver.hpp ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_6_t\n");
+    } else if (std::is_same<TableExtension, ze_graph_dditable_ext_1_5_t>::value) {
+        printf(" Debug - LevelZeroCompilerInDriver.hpp ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_5_t\n");
+    } else if (std::is_same<TableExtension, ze_graph_dditable_ext_1_4_t>::value) {
+        printf(" Debug - LevelZeroCompilerInDriver.hpp ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_4_t\n");
+    } else {
+        printf(" Debug - LevelZeroCompilerInDriver.hpp ze_graph_dditable_ext_last_t  !=  unknown \n");
     }
 
-    if (std::is_same<TableExtension, ze_graph_dditable_ext_1_5_t>::value){
-        printf(" Debug - ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_5_t\n");
-    }else{
-        printf(" Debug - ze_graph_dditable_ext_last_t  != ze_graph_dditable_ext_1_5_t\n");
+    // Check if the type is ze_graph_dditable_ext_1_6_t
+    if (std::is_same<decltype(*graph_ddi_table_ext), ze_graph_dditable_ext_1_5_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - *graph_ddi_table_ext is using "
+                     "ze_graph_dditable_ext_1_5_t"
+                  << std::endl;
+    } else if (std::is_same<decltype(*graph_ddi_table_ext), ze_graph_dditable_ext_1_6_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - *graph_ddi_table_ext is using "
+                     "ze_graph_dditable_ext_1_6_t"
+                  << std::endl;
+    } else {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - *graph_ddi_table_ext is using an unknown "
+                     "extension type"
+                  << std::endl;
+    }
+        // Check if the type is ze_graph_dditable_ext_1_6_t
+    if (std::is_same<decltype(graph_ddi_table_ext), ze_graph_dditable_ext_1_5_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - graph_ddi_table_ext is using "
+                     "ze_graph_dditable_ext_1_5_t"
+                  << std::endl;
+    } else if (std::is_same<decltype(graph_ddi_table_ext), ze_graph_dditable_ext_1_6_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - graph_ddi_table_ext is using "
+                     "ze_graph_dditable_ext_1_6_t"
+                  << std::endl;
+    } else {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - graph_ddi_table_ext is using an unknown "
+                     "extension type"
+                  << std::endl;
     }
 
-    if (std::is_same<TableExtension, ze_graph_dditable_ext_1_4_t>::value){
-        printf(" Debug - ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_4_t\n");
-    }else{
-        printf(" Debug - ze_graph_dditable_ext_last_t  != ze_graph_dditable_ext_1_4_t\n");
+    // Check if the type is ze_graph_dditable_ext_1_6_t
+    if (std::is_same<decltype(*_graphDdiTableExt), ze_graph_dditable_ext_1_5_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - *_graphDdiTableExt is using "
+                     "ze_graph_dditable_ext_1_5_t"
+                  << std::endl;
+    } else if (std::is_same<decltype(*_graphDdiTableExt), ze_graph_dditable_ext_1_6_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - *_graphDdiTableExt is using "
+                     "ze_graph_dditable_ext_1_6_t"
+                  << std::endl;
+    } else {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - *_graphDdiTableExt is using an unknown "
+                     "extension type"
+                  << std::endl;
+    }
+
+    // Check if the type is ze_graph_dditable_ext_1_6_t
+    if (std::is_same<decltype(_graphDdiTableExt), ze_graph_dditable_ext_1_5_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - _graphDdiTableExt is using "
+                     "ze_graph_dditable_ext_1_5_t"
+                  << std::endl;
+    } else if (std::is_same<decltype(_graphDdiTableExt), ze_graph_dditable_ext_1_6_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - _graphDdiTableExt is using "
+                     "ze_graph_dditable_ext_1_6_t"
+                  << std::endl;
+    } else {
+        std::cout << " Debug - LevelZeroCompilerInDriver.hpp zero_init.cpp - _graphDdiTableExt is using an unknown "
+                     "extension type"
+                  << std::endl;
     }
 }
 
