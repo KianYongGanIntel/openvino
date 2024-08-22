@@ -37,7 +37,7 @@ LevelZeroCompilerAdapter::LevelZeroCompilerAdapter(std::shared_ptr<NPUBackends> 
     //
     ze_graph_dditable_ext_last_t* graph_ddi_table_ext = zeroBackend->getGraphDDITableExt();
     
-    // Check if the type is ze_graph_dditable_ext_1_6_t
+    //  checked ze_graph_dditable_ext_1_5_t !
     if (std::is_same<ze_graph_dditable_ext_last_t, ze_graph_dditable_ext_1_6_t>::value) {
         printf(" Debug - LevelZeroCompilerAdapter.cpp TableExtension is ze_graph_dditable_ext_1_6_t\n");
     } 
@@ -47,6 +47,7 @@ LevelZeroCompilerAdapter::LevelZeroCompilerAdapter(std::shared_ptr<NPUBackends> 
         printf(" Debug - LevelZeroCompilerAdapter.cpp TableExtension is not ze_graph_dditable_ext_1_5_t\n");
     }
 
+    // check is 1_5 !
     if (typeid(*graph_ddi_table_ext) == typeid(ze_graph_dditable_ext_1_5_t)) {
         std::cout << " Debug - LevelZeroCompilerAdapter.cpp ze_graph_dditable_ext_last_t is ze_graph_dditable_ext_1_5_t" << std::endl;
     } else if (typeid(*graph_ddi_table_ext) == typeid(ze_graph_dditable_ext_1_6_t)) {
@@ -55,7 +56,7 @@ LevelZeroCompilerAdapter::LevelZeroCompilerAdapter(std::shared_ptr<NPUBackends> 
         std::cout << " Debug - LevelZeroCompilerAdapter.cpp Unknown extension type" << std::endl;
     }
 
-    // Check if the type is ze_graph_dditable_ext_1_6_t
+    // Checked unknown extension 
     if (std::is_same<decltype(*graph_ddi_table_ext), ze_graph_dditable_ext_1_5_t>::value) {
         std::cout << " Debug - LevelZeroCompilerAdapter.hpp zero_init.cpp - graph_ddi_table_ext is using ze_graph_dditable_ext_1_5_t" << std::endl;
     } else if (std::is_same<decltype(*graph_ddi_table_ext), ze_graph_dditable_ext_1_6_t>::value) {

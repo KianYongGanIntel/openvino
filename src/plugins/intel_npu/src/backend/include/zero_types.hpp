@@ -71,8 +71,16 @@ public:
         // version 1.4
         pfnBuildLogGetString = _impl->pfnBuildLogGetString;
 
-        // version 1.5
-        // wrappers replace pointers
+        // // version 1.5
+        // // wrappers replace pointers
+        // // ze_pfnGraphCreate_ext_2_t                 
+        // impl->pfnCreate2;
+
+        // // ze_pfnGraphQueryNetworkCreate_ext_2_t       
+        // impl->pfnQueryNetworkCreate2;
+
+        // // ze_pfnGraphQueryContextMemory_ext_t         
+        // impl->pfnQueryContextMemory;
     }
     ~ze_graph_dditable_ext_decorator() = default;
 
