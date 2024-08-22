@@ -68,6 +68,7 @@ ZeroExecutor::ZeroExecutor(const std::shared_ptr<const ZeroInitStructsHolder>& i
 
     // _graph is a nullptr for CIP path, a new handle will be obtained from the driver based on the given
     // compiledNetwork _graph gets (reuses) graphHandle from the compiler for CID path
+    printf(" Debug - zero_executor.cpp initiate\n");
     if (_networkDesc->metadata.graphHandle == nullptr) {
         _logger.info("Create graph handle on executor");
         _logger.debug("ZeroExecutor::ZeroExecutor - create graph");
@@ -161,8 +162,10 @@ void ZeroExecutor::mutexUnlock() const {
 }
 
 ZeroExecutor::~ZeroExecutor() {
+    printf(" Debug - zero_executor.cpp desctutor ! and destroy graph ! \n");
     auto result = _graph_ddi_table_ext->pfnDestroy(_graph);
     if (ZE_RESULT_SUCCESS != result) {
         _logger.error("_graph_ddi_table_ext->pfnDestroy failed %#X", uint64_t(result));
     }
+    _logger.debug("~ZeroExecutor()");
 }
