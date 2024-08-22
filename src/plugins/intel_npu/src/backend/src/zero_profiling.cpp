@@ -83,14 +83,14 @@ std::vector<ProfilingData> ProfilingQuery::getData() const {
     printf(" Debug - getData() start 1 \n");
     // Obtain the size of the buffer
     queryGetData(type, &size, nullptr);
-    printf(" Debug - getData() start 2 \n")
+    printf(" Debug - getData() start 2 \n");
     OPENVINO_ASSERT(size % sizeof(ProfilingData) == 0);
-    printf(" Debug - getData() start 3 \n")
+    printf(" Debug - getData() start 3 \n");
     // Allocate enough memory and copy the buffer
     std::vector<ProfilingData> profilingData(size / sizeof(ProfilingData));
-    printf(" Debug - getData() start 4 \n")
+    printf(" Debug - getData() start 4 \n");
     queryGetData(type, &size, reinterpret_cast<uint8_t*>(profilingData.data()));
-    printf(" Debug - getData() start 5 \n")
+    printf(" Debug - getData() start 5 \n");
     return profilingData;
 }
 
@@ -121,6 +121,8 @@ void ProfilingQuery::verifyProfilingProperties() const {
     printf(" Debug - verifyProfilingProperties() start 4 \n");
     const auto currentProfilingVersion = ze_profiling_data_ext_version_t::ZE_PROFILING_DATA_EXT_VERSION_CURRENT;
     printf(" Debug - verifyProfilingProperties() start 5 \n");
+    printf(" Debug - profProp.extensionVersion  %d.%d \n", ZE_MAJOR_VERSION(profProp.extensionVersion), ZE_MINOR_VERSION(profProp.extensionVersion));
+    printf(" Debug - currentProfilingVersion    %d.%d \n", ZE_MAJOR_VERSION(currentProfilingVersion), ZE_MINOR_VERSION(currentProfilingVersion));
     if (ZE_MAJOR_VERSION(profProp.extensionVersion) != ZE_MAJOR_VERSION(currentProfilingVersion)) {
         printf(" Debug - verifyProfilingProperties() start 5.1 \n");
         OPENVINO_THROW("Unsupported NPU driver.",
@@ -200,6 +202,7 @@ NpuInferProfiling::NpuInferProfiling(ze_context_handle_t context,
       _device_handle(device_handle),
       _loglevel(loglevel),
       _logger("InferProfiling", loglevel) {
+    printf(" Debug - NpuInferProfiling using ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES_1_2\n");
     /// Fetch and store the device timer resolution
     _dev_properties.stype = ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES_1_2;
     zeroUtils::throwOnFail("zeDeviceGetProperties", zeDeviceGetProperties(_device_handle, &_dev_properties));
