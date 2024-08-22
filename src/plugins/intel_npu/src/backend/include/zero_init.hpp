@@ -40,6 +40,7 @@ public:
     inline char* getGraphExtName() const {
         return graphExtName;
     }
+    //
     inline ze_graph_dditable_ext_last_t* getGraphDDITableExt() {
         return graph_ddi_table_ext;
     }
@@ -70,6 +71,7 @@ private:
     ze_driver_handle_t driver_handle = nullptr;
     ze_device_handle_t device_handle = nullptr;
     char* graphExtName;
+    // 
     ze_graph_dditable_ext_last_t* graph_ddi_table_ext = nullptr;
 
     std::unique_ptr<ze_graph_dditable_ext_decorator> graph_dditable_ext_decorator;

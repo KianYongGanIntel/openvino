@@ -34,7 +34,36 @@ LevelZeroCompilerAdapter::LevelZeroCompilerAdapter(std::shared_ptr<NPUBackends> 
     ze_context_handle_t zeContext = (ze_context_handle_t)zeroBackend->getContext();
     ze_driver_handle_t driverHandle = (ze_driver_handle_t)zeroBackend->getDriverHandle();
     ze_device_handle_t deviceHandle = (ze_device_handle_t)zeroBackend->getDeviceHandle();
+    //
     ze_graph_dditable_ext_last_t* graph_ddi_table_ext = zeroBackend->getGraphDDITableExt();
+    
+    // Check if the type is ze_graph_dditable_ext_1_6_t
+    if (std::is_same<ze_graph_dditable_ext_last_t, ze_graph_dditable_ext_1_6_t>::value) {
+        printf(" Debug - LevelZeroCompilerAdapter.cpp TableExtension is ze_graph_dditable_ext_1_6_t\n");
+    } 
+    else if (std::is_same<ze_graph_dditable_ext_last_t, ze_graph_dditable_ext_1_5_t>::value) {
+        printf(" Debug - LevelZeroCompilerAdapter.cpp TableExtension is ze_graph_dditable_ext_1_5_t\n");
+    } else {
+        printf(" Debug - LevelZeroCompilerAdapter.cpp TableExtension is not ze_graph_dditable_ext_1_5_t\n");
+    }
+
+    if (typeid(*graph_ddi_table_ext) == typeid(ze_graph_dditable_ext_1_5_t)) {
+        std::cout << " Debug - LevelZeroCompilerAdapter.cpp ze_graph_dditable_ext_last_t is ze_graph_dditable_ext_1_5_t" << std::endl;
+    } else if (typeid(*graph_ddi_table_ext) == typeid(ze_graph_dditable_ext_1_6_t)) {
+        std::cout << " Debug - LevelZeroCompilerAdapter.cpp ze_graph_dditable_ext_last_t is ze_graph_dditable_ext_1_6_t" << std::endl;
+    } else {
+        std::cout << " Debug - LevelZeroCompilerAdapter.cpp Unknown extension type" << std::endl;
+    }
+
+    // Check if the type is ze_graph_dditable_ext_1_6_t
+    if (std::is_same<decltype(*graph_ddi_table_ext), ze_graph_dditable_ext_1_5_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerAdapter.hpp zero_init.cpp - graph_ddi_table_ext is using ze_graph_dditable_ext_1_5_t" << std::endl;
+    } else if (std::is_same<decltype(*graph_ddi_table_ext), ze_graph_dditable_ext_1_6_t>::value) {
+        std::cout << " Debug - LevelZeroCompilerAdapter.hpp zero_init.cpp - graph_ddi_table_ext is using ze_graph_dditable_ext_1_6_t" << std::endl;
+    } else {
+        std::cout << " Debug - LevelZeroCompilerAdapter.hpp zero_init.cpp - graph_ddi_table_ext is using an unknown extension type" << std::endl;
+    }
+
 
     if (driverHandle == nullptr) {
         OPENVINO_THROW("LevelZeroCompilerAdapter: Failed to get properties about zeDriver");

@@ -158,6 +158,21 @@ ZeroInferRequest::ZeroInferRequest(const std::shared_ptr<ZeroInitStructsHolder>&
                       _executor->getInitStructs()->getDevice(),
                       _executor->getInitStructs()->getProfilingDdiTable()) {
     _logger.debug("ZeroInferRequest::ZeroInferRequest - SyncInferRequest");
+    _logger.debug("ZeroInferRequest::ZeroInferRequest - checking on _executor->getInitStructs()->getDevice() and "
+                  "getProfilingDdiTable()");
+
+    if (_executor->getInitStructs()->getDevice()) {
+        printf(" Debug - ZeroInferRequest  getDevice() is not nullptr\n");
+    } else {
+        printf(" Debug - ZeroInferRequest  getDevice() is nullptr\n");
+    }
+
+    if (_executor->getInitStructs()->getProfilingDdiTable()) {
+        printf(" Debug - ZeroInferRequest  getProfilingDdiTable() is not nullptr\n");
+    } else {
+        printf(" Debug - ZeroInferRequest  getProfilingDdiTable() is nullptr\n");
+    }
+
     const std::vector<ZeroExecutor::ArgumentDescriptor>& executorInputDescriptors = _executor->get_input_descriptors();
     const std::vector<ZeroExecutor::ArgumentDescriptor>& executorOutputDescriptors =
         _executor->get_output_descriptors();
@@ -614,6 +629,13 @@ std::vector<ov::ProfilingInfo> ZeroInferRequest::get_profiling_info() const {
             return _npuProfiling->getNpuInferStatistics();
         } else {  /// proftype = MODEL or undefined = fallback to model profiling
             _logger.debug("InferRequest::get_profiling_info complete with _profilingQuery.getLayerStatistics().");
+            
+            // if (_profilingQuery != nullptr) {
+            //     std::cout << " Debug - get_profiling_info _profilingQuery is initialized correctly" << std::endl;
+            // } else {
+            //     std::cout << " Debug - get_profiling_info _profilingQuery is not initialized" << std::endl;
+            // }
+
             return _profilingQuery.getLayerStatistics();
         }
     }

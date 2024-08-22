@@ -36,8 +36,16 @@ struct ZeProfilingTypeId<uint8_t> {
 };
 
 bool ProfilingPool::create() {
+    if (_graph_profiling_ddi_table_ext != nullptr) {
+        std::cout << " Debug - ProfilingPool::create() _graph_profiling_ddi_table_ext is initialized correctly" << std::endl;
+    } else {
+        std::cout << " Debug - ProfilingPool::create() _graph_profiling_ddi_table_ext is not initialized" << std::endl;
+    }
+
     auto ret = _graph_profiling_ddi_table_ext->pfnProfilingPoolCreate(_graph_handle, _profiling_count, &_handle);
-    return ((ZE_RESULT_SUCCESS == ret) && (_handle != nullptr));
+    bool result = ((ZE_RESULT_SUCCESS == ret) && (_handle != nullptr));
+    printf(" Debug - ProfilingPool::create() rsult : %s \n", result ? "true" : "false");
+    return result;
 }
 
 ProfilingPool::~ProfilingPool() {
@@ -121,8 +129,12 @@ void ProfilingQuery::verifyProfilingProperties() const {
     printf(" Debug - verifyProfilingProperties() start 4 \n");
     const auto currentProfilingVersion = ze_profiling_data_ext_version_t::ZE_PROFILING_DATA_EXT_VERSION_CURRENT;
     printf(" Debug - verifyProfilingProperties() start 5 \n");
-    printf(" Debug - profProp.extensionVersion  %d.%d \n", ZE_MAJOR_VERSION(profProp.extensionVersion), ZE_MINOR_VERSION(profProp.extensionVersion));
-    printf(" Debug - currentProfilingVersion    %d.%d \n", ZE_MAJOR_VERSION(currentProfilingVersion), ZE_MINOR_VERSION(currentProfilingVersion));
+    printf(" Debug - profProp.extensionVersion  %d.%d \n",
+           ZE_MAJOR_VERSION(profProp.extensionVersion),
+           ZE_MINOR_VERSION(profProp.extensionVersion));
+    printf(" Debug - currentProfilingVersion    %d.%d \n",
+           ZE_MAJOR_VERSION(currentProfilingVersion),
+           ZE_MINOR_VERSION(currentProfilingVersion));
     if (ZE_MAJOR_VERSION(profProp.extensionVersion) != ZE_MAJOR_VERSION(currentProfilingVersion)) {
         printf(" Debug - verifyProfilingProperties() start 5.1 \n");
         OPENVINO_THROW("Unsupported NPU driver.",
