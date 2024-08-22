@@ -121,6 +121,8 @@ void ProfilingQuery::verifyProfilingProperties() const {
     printf(" Debug - verifyProfilingProperties() start 4 \n");
     const auto currentProfilingVersion = ze_profiling_data_ext_version_t::ZE_PROFILING_DATA_EXT_VERSION_CURRENT;
     printf(" Debug - verifyProfilingProperties() start 5 \n");
+    printf(" Debug - profProp.extensionVersion  %d.%d \n", ZE_MAJOR_VERSION(profProp.extensionVersion), ZE_MINOR_VERSION(profProp.extensionVersion));
+    printf(" Debug - currentProfilingVersion    %d.%d \n", ZE_MAJOR_VERSION(currentProfilingVersion), ZE_MINOR_VERSION(currentProfilingVersion));
     if (ZE_MAJOR_VERSION(profProp.extensionVersion) != ZE_MAJOR_VERSION(currentProfilingVersion)) {
         printf(" Debug - verifyProfilingProperties() start 5.1 \n");
         OPENVINO_THROW("Unsupported NPU driver.",
