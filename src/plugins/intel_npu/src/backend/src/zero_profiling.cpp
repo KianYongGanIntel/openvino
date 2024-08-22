@@ -200,6 +200,7 @@ NpuInferProfiling::NpuInferProfiling(ze_context_handle_t context,
       _device_handle(device_handle),
       _loglevel(loglevel),
       _logger("InferProfiling", loglevel) {
+    printf(" Debug - NpuInferProfiling using ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES_1_2\n");
     /// Fetch and store the device timer resolution
     _dev_properties.stype = ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES_1_2;
     zeroUtils::throwOnFail("zeDeviceGetProperties", zeDeviceGetProperties(_device_handle, &_dev_properties));

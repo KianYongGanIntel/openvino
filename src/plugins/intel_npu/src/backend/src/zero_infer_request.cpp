@@ -162,14 +162,18 @@ ZeroInferRequest::ZeroInferRequest(const std::shared_ptr<ZeroInitStructsHolder>&
     const std::vector<ZeroExecutor::ArgumentDescriptor>& executorOutputDescriptors =
         _executor->get_output_descriptors();
 
+    _logger.debug("ZeroInferRequest::ZeroInferRequest - checkpoint 1 ");
+
     auto proftype = config.get<PROFILING_TYPE>();
     if (proftype == ov::intel_npu::ProfilingType::INFER) {
+        _logger.debug("ZeroInferRequest::ZeroInferRequest - checkpoint 1.1 ");
         _logger.debug("ZeroInferRequest::ZeroInferRequest - profiling type == ov::intel_npu::ProfilingType::INFER");
         _npuProfiling = std::make_shared<zeroProfiling::NpuInferProfiling>(_executor->getInitStructs()->getContext(),
                                                                            _executor->getInitStructs()->getDevice(),
                                                                            _config.get<LOG_LEVEL>());
+        _logger.debug("ZeroInferRequest::ZeroInferRequest - checkpoint 1.2 ");
     }
-
+    _logger.debug("ZeroInferRequest::ZeroInferRequest - checkpoint 2 ");
     _properties.stype = ZE_STRUCTURE_TYPE_DEVICE_PROPERTIES;
     zeroUtils::throwOnFail("zeDeviceGetProperties",
                            zeDeviceGetProperties(_executor->getInitStructs()->getDevice(), &_properties));
@@ -585,12 +589,15 @@ std::vector<ov::ProfilingInfo> ZeroInferRequest::get_profiling_info() const {
     const auto& compiledModel = *std::dynamic_pointer_cast<const ICompiledModel>(_compiledModel);
     const auto& compilerConfig = compiledModel.get_config();
     if (!compilerConfig.get<PERF_COUNT>() || !_config.get<PERF_COUNT>()) {
+        _logger.info("ZeroInferRequest::get_profiling_info() If condition and return");
         _logger.warning("InferRequest::get_profiling_info complete with empty {}.");
         return {};
     }
 
     auto compilerType = compilerConfig.get<COMPILER_TYPE>();
+    _logger.info("ZeroInferRequest::get_profiling_info() check MLIR compiler type");
     if (compilerType == ov::intel_npu::CompilerType::MLIR) {
+        _logger.info("ZeroInferRequest::get_profiling_info() enter MLIR compiler type");
         // For plugin compiler retreive raw profiling data from backend and delegate
         // processing to the compiler
         const auto& networkDesc = compiledModel.get_network_description();
@@ -600,6 +607,7 @@ std::vector<ov::ProfilingInfo> ZeroInferRequest::get_profiling_info() const {
         _logger.debug("InferRequest::get_profiling_info complete with compiler->process_profiling_output().");
         return compiler->process_profiling_output(profData, blob, compilerConfig);
     } else {
+        _logger.info("ZeroInferRequest::get_profiling_info() not MLIR compiler type");
         auto proftype = _config.get<PROFILING_TYPE>();
         if (proftype == ov::intel_npu::ProfilingType::INFER) {
             _logger.debug("InferRequest::get_profiling_info complete with _npuProfiling->getNpuInferStatistics().");
