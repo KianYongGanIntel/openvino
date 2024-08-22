@@ -748,6 +748,7 @@ std::shared_ptr<ov::ICompiledModel> Plugin::import_model(std::istream& stream, c
         // If graphHandle is not a nullptr it means there is still an instance of the blob maintained inside the driver
         // and we can release the copy of the blob here to reduce memory consumption.
         if (meta.graphHandle != nullptr) {
+            printf(" Debug - import_model print meta.graphHandle != nulltpr, release memory\n");
             blob.clear();
             blob.shrink_to_fit();
         }

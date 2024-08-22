@@ -194,6 +194,25 @@ LevelZeroCompilerInDriver<TableExtension>::LevelZeroCompilerInDriver(ze_driver_h
       _logger("LevelZeroCompilerInDriver", Logger::global().level()) {
     _context = zeContext;
     _deviceHandle = deviceHandle;
+
+    // ze_graph_dditable_ext_last_t = ze_graph_dditable_ext_1_6_t;
+    if (std::is_same<TableExtension, ze_graph_dditable_ext_1_6_t>::value){
+        printf(" Debug - ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_6_t\n");
+    }else{
+        printf(" Debug - ze_graph_dditable_ext_last_t  != ze_graph_dditable_ext_1_6_t\n");
+    }
+
+    if (std::is_same<TableExtension, ze_graph_dditable_ext_1_5_t>::value){
+        printf(" Debug - ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_5_t\n");
+    }else{
+        printf(" Debug - ze_graph_dditable_ext_last_t  != ze_graph_dditable_ext_1_5_t\n");
+    }
+
+    if (std::is_same<TableExtension, ze_graph_dditable_ext_1_4_t>::value){
+        printf(" Debug - ze_graph_dditable_ext_last_t  == ze_graph_dditable_ext_1_4_t\n");
+    }else{
+        printf(" Debug - ze_graph_dditable_ext_last_t  != ze_graph_dditable_ext_1_4_t\n");
+    }
 }
 
 }  // namespace driverCompilerAdapter
