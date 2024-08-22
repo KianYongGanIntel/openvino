@@ -335,7 +335,9 @@ std::string LevelZeroCompilerInDriver<TableExtension>::serializeIOInfo(const std
 
 template <typename TableExtension>
 void LevelZeroCompilerInDriver<TableExtension>::release(std::shared_ptr<const NetworkDescription> networkDescription) {
+    printf(" Debug - zero_compiler_in_driver.cpp release function \n");
     if (networkDescription->metadata.graphHandle != nullptr) {
+        printf(" Debug - zero_compiler_in_driver.cpp release function - enter (graphHandle != nullptr), pfnDestroyGraphHandle \n");
         ze_graph_handle_t graphHandle = static_cast<ze_graph_handle_t>(networkDescription->metadata.graphHandle);
         auto result = _graphDdiTableExt->pfnDestroy(graphHandle);
 
@@ -345,6 +347,7 @@ void LevelZeroCompilerInDriver<TableExtension>::release(std::shared_ptr<const Ne
                           uint64_t(result));
         }
     }
+    printf(" Debug - zero_compiler_in_driver.cpp finish release function \n");
 }
 
 template <typename TableExtension>

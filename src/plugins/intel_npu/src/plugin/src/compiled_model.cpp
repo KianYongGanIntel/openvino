@@ -136,11 +136,14 @@ std::shared_ptr<ov::ISyncInferRequest> CompiledModel::create_sync_infer_request(
 
 void CompiledModel::export_model(std::ostream& stream) const {
     std::stringstream str;
+    printf(" Debug - export_model ()\n");
     if (_networkPtr->compiledNetwork.size() == 0 && _networkPtr->metadata.graphHandle != nullptr) {
+        printf(" Debug - export_model () first condition 1\n");
         const auto blob = _compiler->getCompiledNetwork(_networkPtr);
         stream.write(reinterpret_cast<const char*>(blob.data()), blob.size());
         str << "Blob size: " << blob.size() << ", hash: " << std::hex << hash(blob);
     } else {
+        printf(" Debug - export_model () first condition 2\n");
         const auto& blob = _networkPtr->compiledNetwork;
         stream.write(reinterpret_cast<const char*>(blob.data()), blob.size());
         str << "Blob size: " << blob.size() << ", hash: " << std::hex << hash(blob);
@@ -152,6 +155,7 @@ void CompiledModel::export_model(std::ostream& stream) const {
     } else {
         _logger.info("Write blob to stream successfully.");
     }
+    printf(" Debug - export_model () done\n");
 }
 
 std::shared_ptr<const ov::Model> CompiledModel::get_runtime_model() const {

@@ -751,6 +751,7 @@ std::shared_ptr<ov::ICompiledModel> Plugin::import_model(std::istream& stream, c
             printf(" Debug - import_model print meta.graphHandle != nulltpr, release memory\n");
             blob.clear();
             blob.shrink_to_fit();
+            printf(" Debug - import_model print meta.graphHandle != nulltpr, release memory\n");
         }
         meta.name = "net" + std::to_string(_compiledModelLoadCounter++);
 
