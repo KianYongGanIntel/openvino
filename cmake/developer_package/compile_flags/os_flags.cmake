@@ -184,12 +184,16 @@ macro(ov_arm_neon_optimization_flags flags)
     endif()
 endmacro()
 
+# Print the value of CMAKE_SHARED_LINKER_FLAGS
+message(STATUS "KY-DEBUG - CMAKE_SHARED_LINKER_FLAGS: ${CMAKE_SHARED_LINKER_FLAGS}")
+
 # Macro to enable ASLR support
 macro(ov_enable_aslr)
     if(UNIX)
         # Linux-specific settings
         set(ASLR_FLAGS "-fPIC")
-        set(LINKER_FLAGS "-Wl,-z,relro,-z,now")
+        # set(LINKER_FLAGS "-Wl,-z,relro,-z,now")
+        # set(LINKER_FLAGS "relro")
 
         # Ensure Position Independent Code (PIC) for ASLR compatibility
         set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -215,7 +219,13 @@ macro(ov_enable_aslr)
         )
 
         message(STATUS "ASLR support added for Linux: PIC enabled and security flags set.")
+        # Print the value of CMAKE_SHARED_LINKER_FLAGS
+        message(STATUS "KY-DEBUG Check - CMAKE_SHARED_LINKER_FLAGS: ${CMAKE_SHARED_LINKER_FLAGS}")
         
+        # Remove unwanted linker flags
+        string(REPLACE "-Wl,--gc-sections" "" CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,relro -Wl,-z,now")
+        string(REPLACE "-Wl,--exclude-libs,ALL" "" CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,relro -Wl,-z,now")
+
     elseif(WIN32)
         # Windows-specific settings
         set(ASLR_FLAGS "/DYNAMICBASE /NXCOMPAT")
