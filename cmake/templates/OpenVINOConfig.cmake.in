@@ -480,8 +480,6 @@ function(_ov_target_no_deprecation_error)
 
         if(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
             set(flags "-diag-warning=1786")
-        else()
-            set(flags "-Wno-error=deprecated-declarations")
         endif()
 
         set_target_properties(${ARGV} PROPERTIES INTERFACE_COMPILE_OPTIONS $<$<NOT:$<BOOL:$<TARGET_PROPERTY:TREAT_DEPRECATED_DECLARATIONS_AS_ERRORS>>>:${flags}>)

@@ -48,12 +48,13 @@
 #if defined(__clang__) || ((__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ > 405))
 #    define OPENVINO_SUPPRESS_DEPRECATED_START  \
         OPENVINO_DO_PRAGMA(GCC diagnostic push) \
-        OPENVINO_DO_PRAGMA(GCC diagnostic ignored "-Wdeprecated-declarations")
+        OPENVINO_DO_PRAGMA(GCC diagnostic ignored "")
 #    define OPENVINO_SUPPRESS_DEPRECATED_END OPENVINO_DO_PRAGMA(GCC diagnostic pop)
 #elif defined(_MSC_VER)
 #    define OPENVINO_SUPPRESS_DEPRECATED_START \
-        OPENVINO_DO_PRAGMA(warning(push))      \
-        OPENVINO_DO_PRAGMA(warning(disable : 4996))
+        OPENVINO_DO_PRAGMA(warning(push))      
+        // \
+        // OPENVINO_DO_PRAGMA(warning(disable : 4996))
 #    define OPENVINO_SUPPRESS_DEPRECATED_END OPENVINO_DO_PRAGMA(warning(pop))
 #elif defined(__INTEL_COMPILER)
 #    define OPENVINO_SUPPRESS_DEPRECATED_START      \

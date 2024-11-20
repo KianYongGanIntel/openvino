@@ -342,7 +342,7 @@ void ov::util::convert_path_win_style(std::string& path) {
 
 #    ifdef __clang__
 #        pragma clang diagnostic push
-#        pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#        pragma clang diagnostic ignored ""
 #    endif
 
 std::string ov::util::wstring_to_string(const std::wstring& wstr) {

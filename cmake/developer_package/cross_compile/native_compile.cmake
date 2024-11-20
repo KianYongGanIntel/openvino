@@ -61,10 +61,10 @@ function(ov_native_compile_external_project)
         list(APPEND cmake_env --unset=CMAKE_TOOLCHAIN_FILE)
     endif()
 
-    # compile flags
-    if(CMAKE_COMPILER_IS_GNUCXX OR OV_COMPILER_IS_CLANG OR (OV_COMPILER_IS_INTEL_LLVM AND UNIX))
-        set(compile_flags "-Wno-undef -Wno-error -Wno-deprecated-declarations")
-    endif()
+    # # compile flags
+    # if(CMAKE_COMPILER_IS_GNUCXX OR OV_COMPILER_IS_CLANG OR (OV_COMPILER_IS_INTEL_LLVM AND UNIX))
+    #     set(compile_flags "-Wno-undef -Wno-error -Wno-deprecated-declarations")
+    # endif()
 
     if(ARG_NATIVE_SOURCE_SUBDIR)
         set(ARG_NATIVE_SOURCE_SUBDIR SOURCE_SUBDIR ${ARG_NATIVE_SOURCE_SUBDIR})
